@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: benefits-authorizer
+  datasource:
+    url: jdbc:mysql://localhost:3306/benefits_authorizer
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  initial-balance: 500

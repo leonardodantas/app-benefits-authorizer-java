@@ -1,0 +1,37 @@
+package com.leotech.benefits.authorizer.infra.repositories;
+
+import com.leotech.benefits.authorizer.app.repositories.CardRepository;
+import com.leotech.benefits.authorizer.domain.card.Card;
+import com.leotech.benefits.authorizer.infra.entities.CardEntity;
+import com.leotech.benefits.authorizer.infra.mappers.CardInfraMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
+public class CardRepositoryImpl implements CardRepository {
+
+    private final JpaCardRepository jpaCardRepository;
+    private final CardInfraMapper cardInfraMapper;
+
+    @Override
+    public Optional<Card> findByCardNumber(final String cardNumber) {
+        return jpaCardRepository.findByCardNumber(cardNumber)
+                .map(cardInfraMapper::toDomain);
+    }
+
+    @Override
+    public Optional<Card> findWithLockByCardNumber(final String cardNumber) {
+        return jpaCardRepository.findWithLockByCardNumber(cardNumber)
+                .map(cardInfraMapper::toDomain);
+    }
+
+    @Override
+    public Card save(final Card card) {
+        final CardEntity entity = cardInfraMapper.toEntity(card);
+        final CardEntity saved = jpaCardRepository.save(entity);
+        return cardInfraMapper.toDomain(saved);
+    }
+}
