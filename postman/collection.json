@@ -1,0 +1,56 @@
+{
+	"info": {
+		"name": "Benefits Authorizer",
+		"description": "API de autorização de transações para cartões de benefícios",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Criar cartão",
+			"request": {
+				"method": "POST",
+				"header": [
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"numeroCartao\": \"6549873025634501\",\n  \"senha\": \"1234\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/cartoes",
+					"host": ["http://localhost:8080"],
+					"path": ["cartoes"]
+				}
+			}
+		},
+		{
+			"name": "Consultar saldo",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "http://localhost:8080/cartoes/6549873025634501",
+					"host": ["http://localhost:8080"],
+					"path": ["cartoes", "6549873025634501"]
+				}
+			}
+		},
+		{
+			"name": "Processar transação",
+			"request": {
+				"method": "POST",
+				"header": [
+					{ "key": "Content-Type", "value": "application/json" }
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"numeroCartao\": \"6549873025634501\",\n  \"senhaCartao\": \"1234\",\n  \"valor\": 50.00\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/transacoes",
+					"host": ["http://localhost:8080"],
+					"path": ["transacoes"]
+				}
+			}
+		}
+	]
+}
