@@ -74,7 +74,7 @@ class TransactionControllerTest {
             final var domain = new Transaction("9999999999999999", PASSWORD, AMOUNT);
 
             when(transactionMapper.toDomain(request)).thenReturn(domain);
-            doThrow(new CardNotExistsException("9999999999999999"))
+            doThrow(new CardNotExistsException())
                     .when(createTransactionUseCase).execute(domain);
 
             mockMvc.perform(post("/transacoes")

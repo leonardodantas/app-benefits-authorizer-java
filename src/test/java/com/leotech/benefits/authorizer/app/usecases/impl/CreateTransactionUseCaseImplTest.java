@@ -1,8 +1,7 @@
 package com.leotech.benefits.authorizer.app.usecases.impl;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
-import com.leotech.benefits.authorizer.app.usecases.impl.transaction.TransactionContext;
-import com.leotech.benefits.authorizer.app.usecases.impl.transaction.TransactionHandler;
+import com.leotech.benefits.authorizer.app.usecases.impl.transaction.HandlerStatus;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +26,7 @@ class CreateTransactionUseCaseImplTest {
     private CreateTransactionUseCaseImpl createTransactionUseCase;
 
     @Mock
-    private TransactionHandler transactionChain;
+    private TransactionExecutor transactionExecutor;
 
     @Mock
     private CardRepository cardRepository;
@@ -51,15 +50,12 @@ class CreateTransactionUseCaseImplTest {
 
         final Transaction transaction = new Transaction(CARD_NUMBER, "raw-password", AMOUNT);
 
-        doAnswer(invocation -> {
-            final TransactionContext ctx = invocation.getArgument(0);
-            ctx.setCard(card);
-            return null;
-        }).when(transactionChain).handle(any(TransactionContext.class));
+        when(transactionExecutor.execute(any(Transaction.class)))
+                .thenReturn(new TransactionExecutor.TransactionResult(HandlerStatus.SUCCESS, card));
 
         createTransactionUseCase.execute(transaction);
 
-        verify(transactionChain).handle(any(TransactionContext.class));
+        verify(transactionExecutor).execute(any(Transaction.class));
         verify(cardRepository).save(cardCaptor.capture());
 
         final Card savedCard = cardCaptor.getValue();
