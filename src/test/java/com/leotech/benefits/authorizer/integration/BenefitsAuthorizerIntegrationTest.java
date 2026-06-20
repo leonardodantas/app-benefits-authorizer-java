@@ -5,6 +5,8 @@ import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,6 +53,9 @@ class BenefitsAuthorizerIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
     }
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @LocalServerPort
     private int port;
 
@@ -64,6 +69,7 @@ class BenefitsAuthorizerIntegrationTest {
     @BeforeEach
     void setUp() {
         baseUrl = "http://localhost:" + port;
+        jdbcTemplate.execute("DELETE FROM cards");
     }
 
     private PostResult postRaw(final String path, final Object request) {
