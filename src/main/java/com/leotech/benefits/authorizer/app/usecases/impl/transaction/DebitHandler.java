@@ -16,8 +16,8 @@ public final class DebitHandler extends TransactionHandler {
 
     @Override
     protected void doHandle(final TransactionContext context) {
-        final Card card = context.card();
-        final BigDecimal amount = context.transaction().amount();
+        final Card card = context.getCard();
+        final BigDecimal amount = context.getTransaction().amount();
         final BigDecimal newBalance = card.balance().subtract(amount);
 
         log.info("Debiting {} from card {}: {} -> {}", amount, card.cardNumber(), card.balance(), newBalance);

@@ -32,8 +32,8 @@ class BalanceValidationHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.exception()).isNull();
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.getException()).isNull();
         }
     }
 
@@ -56,8 +56,8 @@ class BalanceValidationHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.exception()).isNull();
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.getException()).isNull();
         }
     }
 
@@ -80,9 +80,9 @@ class BalanceValidationHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.exception()).isInstanceOf(InsufficientBalanceException.class);
-            assertThat(context.exception()).hasMessage("SALDO_INSUFICIENTE");
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.getException()).isInstanceOf(InsufficientBalanceException.class);
+            assertThat(context.getException()).hasMessage("SALDO_INSUFICIENTE");
         }
     }
 }

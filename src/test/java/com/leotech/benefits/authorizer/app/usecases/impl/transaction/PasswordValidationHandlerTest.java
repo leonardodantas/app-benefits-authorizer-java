@@ -44,8 +44,8 @@ class PasswordValidationHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.exception()).isNull();
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.getException()).isNull();
             verify(passwordEncoder).matches("raw-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }
@@ -67,9 +67,9 @@ class PasswordValidationHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.exception()).isInstanceOf(InvalidPasswordException.class);
-            assertThat(context.exception()).hasMessage("SENHA_INVALIDA");
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.getException()).isInstanceOf(InvalidPasswordException.class);
+            assertThat(context.getException()).hasMessage("SENHA_INVALIDA");
             verify(passwordEncoder).matches("wrong-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }

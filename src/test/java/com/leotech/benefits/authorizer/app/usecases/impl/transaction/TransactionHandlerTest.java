@@ -61,9 +61,9 @@ class TransactionHandlerTest {
 
             first.handle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.exception()).isInstanceOf(TransactionSystemException.class);
-            assertThat(context.exception()).hasMessage("SISTEMA_INTERMITENTE");
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.getException()).isInstanceOf(TransactionSystemException.class);
+            assertThat(context.getException()).hasMessage("SISTEMA_INTERMITENTE");
             verify(second, never()).doHandle(any(TransactionContext.class));
         }
     }

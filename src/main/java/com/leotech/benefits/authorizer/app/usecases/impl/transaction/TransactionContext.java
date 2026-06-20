@@ -3,8 +3,10 @@ package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.shared.CustomException;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
+import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 public class TransactionContext {
 
     private final Transaction transaction;
@@ -17,17 +19,5 @@ public class TransactionContext {
 
     public TransactionContext(final Transaction transaction) {
         this.transaction = transaction;
-    }
-
-    public HandlerStatus status() {
-        return status;
-    }
-
-    public CustomException exception() {
-        return exception;
-    }
-
-    public Transaction transaction() {
-        return transaction;
     }
 }

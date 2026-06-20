@@ -17,7 +17,7 @@ public class CardExistenceHandler extends TransactionHandler {
 
     @Override
     protected void doHandle(final TransactionContext context) {
-        final String cardNumber = context.transaction().cardNumber();
+        final String cardNumber = context.getTransaction().cardNumber();
         log.info("Checking existence of card {}", cardNumber);
         final Optional<Card> optionalCard = cardRepository.findWithLockByCardNumber(cardNumber);
 

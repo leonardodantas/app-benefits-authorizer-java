@@ -14,14 +14,14 @@ public class PasswordValidationHandler extends TransactionHandler {
 
     @Override
     protected void doHandle(final TransactionContext context) {
-        log.info("Validating password for card {}", context.transaction().cardNumber());
-        if (passwordEncoder.matches(context.transaction().password(), context.card().password())) {
-            log.info("Password validated for card {}", context.transaction().cardNumber());
+        log.info("Validating password for card {}", context.getTransaction().cardNumber());
+        if (passwordEncoder.matches(context.getTransaction().password(), context.getCard().password())) {
+            log.info("Password validated for card {}", context.getTransaction().cardNumber());
             context.setStatus(HandlerStatus.CONTINUE);
             return;
         }
 
-        log.warn("Invalid password for card {}", context.transaction().cardNumber());
+        log.warn("Invalid password for card {}", context.getTransaction().cardNumber());
         context.setStatus(HandlerStatus.STOP);
         context.setException(new InvalidPasswordException());
     }

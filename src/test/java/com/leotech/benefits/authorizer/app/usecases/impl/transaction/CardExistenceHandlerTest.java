@@ -45,7 +45,7 @@ class CardExistenceHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.card()).isEqualTo(card);
+            assertThat(context.getCard()).isEqualTo(card);
             verify(cardRepository).findWithLockByCardNumber("123");
             verifyNoMoreInteractions(cardRepository);
         }
@@ -65,9 +65,9 @@ class CardExistenceHandlerTest {
 
             handler.doHandle(context);
 
-            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.exception()).isInstanceOf(CardNotExistsException.class);
-            assertThat(context.exception()).hasMessage("CARTAO_INEXISTENTE");
+            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.getException()).isInstanceOf(CardNotExistsException.class);
+            assertThat(context.getException()).hasMessage("CARTAO_INEXISTENTE");
             verify(cardRepository).findWithLockByCardNumber("123");
             verifyNoMoreInteractions(cardRepository);
         }
