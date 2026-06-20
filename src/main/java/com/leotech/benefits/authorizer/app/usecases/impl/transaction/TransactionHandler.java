@@ -12,7 +12,7 @@ public abstract class TransactionHandler {
 
     public final void handle(final TransactionContext context) {
         doHandle(context);
-        if(Objects.nonNull(next)) {
+        if (context.status() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
             next.handle(context);
         }
     }
