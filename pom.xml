@@ -198,6 +198,9 @@
 								<exclude>com/leotech/benefits/authorizer/config/**</exclude>
 								<exclude>com/leotech/benefits/authorizer/api/mappers/**</exclude>
 								<exclude>com/leotech/benefits/authorizer/infra/mappers/**</exclude>
+								<exclude>com/leotech/benefits/authorizer/api/requests/**</exclude>
+								<exclude>com/leotech/benefits/authorizer/api/responses/**</exclude>
+								<exclude>com/leotech/benefits/authorizer/domain/**</exclude>
 							</excludes>
 							<rules>
 								<rule>
