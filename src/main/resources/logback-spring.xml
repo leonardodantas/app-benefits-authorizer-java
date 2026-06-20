@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="com.leotech.benefits.authorizer" level="INFO"/>
+    <logger name="com.leotech.benefits.authorizer.infra.repositories" level="DEBUG"/>
+
+    <springProfile name="dev">
+        <logger name="com.leotech.benefits.authorizer" level="DEBUG"/>
+    </springProfile>
+</configuration>
