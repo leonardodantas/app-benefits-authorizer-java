@@ -2,7 +2,7 @@ package com.leotech.benefits.authorizer.app.usecases.impl;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
 import com.leotech.benefits.authorizer.app.services.PasswordEncoder;
-import com.leotech.benefits.authorizer.config.AppProperties;
+import com.leotech.benefits.authorizer.app.config.AppProperties;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
 import org.junit.jupiter.api.DisplayName;

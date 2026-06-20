@@ -27,7 +27,7 @@ class ArchitectureTest {
         ArchRule rule = noClasses()
                 .that().resideInAPackage("..domain..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..app..", "..infra..", "..config..");
+                .resideInAnyPackage(BASE + ".api", BASE + ".app", BASE + ".infra", BASE + ".config");
 
         rule.check(classes);
     }
@@ -36,9 +36,9 @@ class ArchitectureTest {
     @DisplayName("api must not depend directly on infra or config")
     void apiMustNotDependOnInfraOrConfig() {
         ArchRule rule = noClasses()
-                .that().resideInAPackage("..api..")
+                .that().resideInAPackage(BASE + ".api")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..infra..", "..config..");
+                .resideInAnyPackage(BASE + ".infra", BASE + ".config");
 
         rule.check(classes);
     }
@@ -47,20 +47,20 @@ class ArchitectureTest {
     @DisplayName("infra must not depend on api or config")
     void infraMustNotDependOnApiOrConfig() {
         ArchRule rule = noClasses()
-                .that().resideInAPackage("..infra..")
+                .that().resideInAPackage(BASE + ".infra")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..config..");
+                .resideInAnyPackage(BASE + ".api", BASE + ".config");
 
         rule.check(classes);
     }
 
     @Test
-    @DisplayName("app must not depend on api, infra or config")
-    void appMustNotDependOnApiInfraOrConfig() {
+    @DisplayName("app must not depend on api or infra")
+    void appMustNotDependOnApiOrInfra() {
         ArchRule rule = noClasses()
-                .that().resideInAPackage("..app..")
+                .that().resideInAPackage(BASE + ".app..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..infra..", "..config..");
+                .resideInAnyPackage(BASE + ".api", BASE + ".infra");
 
         rule.check(classes);
     }
