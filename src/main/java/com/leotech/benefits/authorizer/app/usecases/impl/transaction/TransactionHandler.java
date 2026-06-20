@@ -4,6 +4,9 @@ import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemExcep
 
 import java.util.Objects;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class TransactionHandler {
 
     private TransactionHandler next;
@@ -19,6 +22,7 @@ public abstract class TransactionHandler {
                 next.handle(context);
             }
         } catch (final RuntimeException e) {
+            log.error("Unexpected error in handler", e);
             context.setStatus(HandlerStatus.STOP);
             context.setException(new TransactionSystemException());
         }

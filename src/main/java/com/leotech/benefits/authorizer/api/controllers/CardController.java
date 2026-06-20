@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 @RestController
 @RequestMapping("/cartoes")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Cartões", description = "Operações sobre cartões de benefícios")
 public class CardController {
 
@@ -41,8 +43,10 @@ public class CardController {
     @ApiResponse(responseCode = "201", description = "Cartão criado com sucesso")
     @ApiResponse(responseCode = "422", description = "Cartão já existe", content = @Content)
     public CreateCardResponse create(@RequestBody @Valid final CreateCardRequest request) {
+        log.info("Creating card {}", request.cardNumber());
         final Card card = cardMapper.toDomain(request);
         final Card createdCard = createCardUseCase.execute(card);
+        log.info("Card {} created with balance {}", createdCard.cardNumber(), createdCard.balance());
         return cardMapper.toResponse(createdCard);
     }
 
@@ -53,6 +57,9 @@ public class CardController {
                     examples = @ExampleObject("495.15")))
     @ApiResponse(responseCode = "404", description = "Cartão não encontrado", content = @Content)
     public BigDecimal getBalance(@PathVariable("numeroCartao") final String cardNumber) {
-        return getBalanceUseCase.execute(cardNumber);
+        log.info("Getting balance for card {}", cardNumber);
+        final BigDecimal balance = getBalanceUseCase.execute(cardNumber);
+        log.info("Balance for card {} is {}", cardNumber, balance);
+        return balance;
     }
 }

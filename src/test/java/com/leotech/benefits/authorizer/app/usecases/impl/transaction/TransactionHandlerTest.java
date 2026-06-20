@@ -3,6 +3,7 @@ package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

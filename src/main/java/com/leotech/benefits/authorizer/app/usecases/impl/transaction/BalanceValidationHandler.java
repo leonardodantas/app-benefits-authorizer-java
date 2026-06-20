@@ -4,6 +4,9 @@ import com.leotech.benefits.authorizer.domain.transaction.InsufficientBalanceExc
 
 import java.math.BigDecimal;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BalanceValidationHandler extends TransactionHandler {
 
     @Override
@@ -11,11 +14,14 @@ public class BalanceValidationHandler extends TransactionHandler {
         final BigDecimal balance = context.card().balance();
         final BigDecimal amount = context.transaction().amount();
 
+        log.info("Validating balance: {} >= {}", balance, amount);
         if (balance.compareTo(amount) >= 0) {
+            log.info("Balance sufficient for card {}", context.transaction().cardNumber());
             context.setStatus(HandlerStatus.CONTINUE);
             return;
         }
 
+        log.warn("Insufficient balance for card {}", context.transaction().cardNumber());
         context.setStatus(HandlerStatus.STOP);
         context.setException(new InsufficientBalanceException());
     }

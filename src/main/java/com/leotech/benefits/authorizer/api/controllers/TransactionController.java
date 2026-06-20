@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/transacoes")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Transações", description = "Operações sobre transações")
 public class TransactionController {
 
@@ -34,8 +36,10 @@ public class TransactionController {
     @ApiResponse(responseCode = "422", description = "Regra de autorização barrou a transação",
             content = @Content(mediaType = "text/plain"))
     public void create(@RequestBody @Valid final CreateTransactionRequest request) {
+        log.info("Processing transaction for card {}", request.cardNumber());
         final Transaction transaction = transactionMapper.toDomain(request);
 
         createTransactionUseCase.execute(transaction);
+        log.info("Transaction for card {} completed", request.cardNumber());
     }
 }
