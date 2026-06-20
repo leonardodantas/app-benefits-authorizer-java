@@ -1,7 +1,6 @@
 package com.leotech.benefits.authorizer.app.usecases.impl;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
-import com.leotech.benefits.authorizer.app.usecases.impl.transaction.HandlerStatus;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +50,7 @@ class CreateTransactionUseCaseImplTest {
         final Transaction transaction = new Transaction(CARD_NUMBER, "raw-password", AMOUNT);
 
         when(transactionExecutor.execute(any(Transaction.class)))
-                .thenReturn(new TransactionExecutor.TransactionResult(HandlerStatus.SUCCESS, card));
+                .thenReturn(card);
 
         createTransactionUseCase.execute(transaction);
 

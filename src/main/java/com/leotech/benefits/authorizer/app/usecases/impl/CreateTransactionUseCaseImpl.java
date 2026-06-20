@@ -2,7 +2,6 @@ package com.leotech.benefits.authorizer.app.usecases.impl;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
 import com.leotech.benefits.authorizer.app.usecases.CreateTransactionUseCase;
-import com.leotech.benefits.authorizer.app.usecases.impl.transaction.HandlerStatus;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +18,10 @@ public class CreateTransactionUseCaseImpl implements CreateTransactionUseCase {
     @Override
     @Transactional
     public void execute(final Transaction transaction) {
-        final TransactionExecutor.TransactionResult result = transactionExecutor.execute(transaction);
+        final Card card = transactionExecutor.execute(transaction);
 
-        if (result.status() != HandlerStatus.SUCCESS) {
-            return;
-        }
-
-        final Card cardUpdated = result.card().toBuilder()
-                .balance(result.card().balance().subtract(transaction.amount()))
+        final Card cardUpdated = card.toBuilder()
+                .balance(card.balance().subtract(transaction.amount()))
                 .build();
 
         cardRepository.save(cardUpdated);

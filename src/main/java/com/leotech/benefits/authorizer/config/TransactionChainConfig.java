@@ -2,7 +2,6 @@ package com.leotech.benefits.authorizer.config;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
 import com.leotech.benefits.authorizer.app.services.PasswordEncoder;
-import com.leotech.benefits.authorizer.app.usecases.impl.TransactionExecutor;
 import com.leotech.benefits.authorizer.app.usecases.impl.transaction.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +23,4 @@ public class TransactionChainConfig {
         return cardExistence;
     }
 
-    @Bean
-    public TransactionExecutor transactionExecutor(final TransactionHandler transactionChain) {
-        return new TransactionExecutor(transactionChain);
-    }
 }
