@@ -125,6 +125,23 @@ class TransactionControllerTest {
         }
 
         @Test
+        @DisplayName("should return 400 when card number has invalid format")
+        void shouldReturn400InvalidCardNumber() throws Exception {
+            mockMvc.perform(post("/transacoes")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"numeroCartao": "123", "senhaCartao": "1234", "valor": 10.00}
+                                    """))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.message").value("Validation failed"))
+                    .andExpect(jsonPath("$.errors[0].field").value("cardNumber"))
+                    .andExpect(jsonPath("$.errors[0].message").value("must match \"^\\d{16}$\""));
+
+            verifyNoInteractions(createTransactionUseCase, transactionMapper);
+        }
+
+        @Test
         @DisplayName("should return 400 when request is invalid")
         void shouldReturn400() throws Exception {
             mockMvc.perform(post("/transacoes")

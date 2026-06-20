@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
@@ -33,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@Import(TestSecurityConfig.class)
 class BenefitsAuthorizerIntegrationTest {
 
     @Container
@@ -213,23 +211,20 @@ class BenefitsAuthorizerIntegrationTest {
     @DisplayName("Concurrency")
     class Concurrency {
 
-        private static final String CARD_NUMBER = "5555555555555555";
+        private static final String TEN_TRANSACTIONS_CARD = "5555555555555555";
+        private static final String THREE_DIFFERENT_AMOUNTS_CARD = "6666666666666666";
         private static final int THREAD_COUNT = 10;
         private static final BigDecimal AMOUNT = new BigDecimal("30.00");
         private static final BigDecimal EXPECTED_BALANCE = new BigDecimal("200.00");
 
-        @BeforeEach
-        void createCard() {
-            final var request = new CreateCardRequest(CARD_NUMBER, "1234");
-            postRaw("/cartoes", request);
-        }
-
         @Test
         @DisplayName("should handle concurrent transactions with correct final balance")
         void shouldHandleConcurrentTransactions() throws Exception {
+            postRaw("/cartoes", new CreateCardRequest(TEN_TRANSACTIONS_CARD, "1234"));
+
             final ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
             final CyclicBarrier barrier = new CyclicBarrier(THREAD_COUNT);
-            final var request = new CreateTransactionRequest(CARD_NUMBER, "1234", AMOUNT);
+            final var request = new CreateTransactionRequest(TEN_TRANSACTIONS_CARD, "1234", AMOUNT);
 
             final List<Callable<PostResult>> tasks = new ArrayList<>();
             for (int i = 0; i < THREAD_COUNT; i++) {
@@ -248,9 +243,51 @@ class BenefitsAuthorizerIntegrationTest {
                 assertThat(result.status()).as("body: " + result.body()).isEqualTo(201);
             }
 
-            final var balanceResult = getRaw("/cartoes/" + CARD_NUMBER);
+            final var balanceResult = getRaw("/cartoes/" + TEN_TRANSACTIONS_CARD);
             assertThat(balanceResult.status()).isEqualTo(200);
             assertThat(new BigDecimal(balanceResult.body())).isEqualByComparingTo(EXPECTED_BALANCE);
+        }
+
+        @Test
+        @DisplayName("should handle concurrent transactions with different amounts: 2 succeed, 1 fails with insufficient balance")
+        void shouldHandleConcurrentTransactionsWithDifferentAmounts() throws Exception {
+            postRaw("/cartoes", new CreateCardRequest(THREE_DIFFERENT_AMOUNTS_CARD, "1234"));
+
+            final int threadCount = 3;
+            final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            final CyclicBarrier barrier = new CyclicBarrier(threadCount);
+
+            final var amounts = List.of(
+                    new BigDecimal("200.00"),
+                    new BigDecimal("300.00"),
+                    new BigDecimal("100.00")
+            );
+
+            final List<Callable<PostResult>> tasks = new ArrayList<>();
+            for (final var amount : amounts) {
+                tasks.add(() -> {
+                    barrier.await(10, TimeUnit.SECONDS);
+                    return postRaw("/transacoes", new CreateTransactionRequest(THREE_DIFFERENT_AMOUNTS_CARD, "1234", amount));
+                });
+            }
+
+            final List<Future<PostResult>> futures = executor.invokeAll(tasks, 30, TimeUnit.SECONDS);
+            executor.shutdown();
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+
+            long successCount = 0;
+            long failCount = 0;
+            for (final var future : futures) {
+                final var result = future.get();
+                if (result.status() == 201) {
+                    successCount++;
+                } else if (result.status() == 422 && result.body().equals("SALDO_INSUFICIENTE")) {
+                    failCount++;
+                }
+            }
+
+            assertThat(successCount).isEqualTo(2);
+            assertThat(failCount).isEqualTo(1);
         }
     }
 
