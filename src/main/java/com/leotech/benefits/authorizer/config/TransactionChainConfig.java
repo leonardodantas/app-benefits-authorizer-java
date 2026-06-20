@@ -11,14 +11,14 @@ public class TransactionChainConfig {
 
     @Bean
     public TransactionHandler transactionChain(final CardRepository cardRepository, final PasswordEncoder passwordEncoder) {
-        final TransactionHandler terminal = new TerminalHandler();
+        final TransactionHandler debit = new DebitHandler(cardRepository);
         final TransactionHandler balanceValidation = new BalanceValidationHandler();
         final TransactionHandler passwordValidation = new PasswordValidationHandler(passwordEncoder);
         final TransactionHandler cardExistence = new CardExistenceHandler(cardRepository);
 
         cardExistence.setNext(passwordValidation);
         passwordValidation.setNext(balanceValidation);
-        balanceValidation.setNext(terminal);
+        balanceValidation.setNext(debit);
 
         return cardExistence;
     }
