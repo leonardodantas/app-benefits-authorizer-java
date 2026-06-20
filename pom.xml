@@ -172,6 +172,17 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
+				<configuration>
+					<excludes>
+						<exclude>com/leotech/benefits/authorizer/BenefitsAuthorizerApplication.class</exclude>
+						<exclude>com/leotech/benefits/authorizer/config/**</exclude>
+						<exclude>com/leotech/benefits/authorizer/api/mappers/**</exclude>
+						<exclude>com/leotech/benefits/authorizer/infra/mappers/**</exclude>
+						<exclude>com/leotech/benefits/authorizer/api/requests/**</exclude>
+						<exclude>com/leotech/benefits/authorizer/api/responses/**</exclude>
+						<exclude>com/leotech/benefits/authorizer/domain/**</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -193,15 +204,6 @@
 							<goal>check</goal>
 						</goals>
 						<configuration>
-							<excludes>
-								<exclude>com/leotech/benefits/authorizer/BenefitsAuthorizerApplication.class</exclude>
-								<exclude>com/leotech/benefits/authorizer/config/**</exclude>
-								<exclude>com/leotech/benefits/authorizer/api/mappers/**</exclude>
-								<exclude>com/leotech/benefits/authorizer/infra/mappers/**</exclude>
-								<exclude>com/leotech/benefits/authorizer/api/requests/**</exclude>
-								<exclude>com/leotech/benefits/authorizer/api/responses/**</exclude>
-								<exclude>com/leotech/benefits/authorizer/domain/**</exclude>
-							</excludes>
 							<rules>
 								<rule>
 									<element>BUNDLE</element>
