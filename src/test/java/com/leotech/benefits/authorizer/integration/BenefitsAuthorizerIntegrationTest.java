@@ -39,7 +39,7 @@ class BenefitsAuthorizerIntegrationTest {
 
     @Container
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("benefits_authorizer")
+            .withDatabaseName("miniautorizador")
             .withUsername("root")
             .withPassword("root");
 
@@ -126,6 +126,23 @@ class BenefitsAuthorizerIntegrationTest {
 
             assertThat(result.status()).isEqualTo(422);
         }
+
+        @Test
+        @DisplayName("should return 400 when card number has invalid format")
+        void shouldReturn400InvalidCardNumber() {
+            final var request = new CreateCardRequest("123", "1234");
+            final var result = postRaw("/cartoes", request);
+
+            assertThat(result.status()).isEqualTo(400);
+        }
+
+        @Test
+        @DisplayName("should return 400 when campos ausentes")
+        void shouldReturn400MissingFields() {
+            final var result = postRaw("/cartoes", new CreateCardRequest("", ""));
+
+            assertThat(result.status()).isEqualTo(400);
+        }
     }
 
     @Nested
@@ -207,6 +224,24 @@ class BenefitsAuthorizerIntegrationTest {
 
             assertThat(result.status()).isEqualTo(422);
             assertThat(result.body()).isEqualTo("SALDO_INSUFICIENTE");
+        }
+
+        @Test
+        @DisplayName("should return 400 when card number has invalid format")
+        void shouldReturn400InvalidCardNumber() {
+            final var request = new CreateTransactionRequest("123", "1234", new BigDecimal("10.00"));
+            final var result = postRaw("/transacoes", request);
+
+            assertThat(result.status()).isEqualTo(400);
+        }
+
+        @Test
+        @DisplayName("should return 400 when amount is zero")
+        void shouldReturn400InvalidAmount() {
+            final var request = new CreateTransactionRequest(CARD_NUMBER, "1234", BigDecimal.ZERO);
+            final var result = postRaw("/transacoes", request);
+
+            assertThat(result.status()).isEqualTo(400);
         }
     }
 
