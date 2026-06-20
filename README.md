@@ -77,12 +77,15 @@ Retorna o saldo atual do cartão.
 
 ### Processar transação (`POST /transacoes`)
 
-Processa uma transação com validação em cadeia (Chain of Responsibility):
+Processa uma transação utilizando o padrão **Chain of Responsibility**, onde cada handler é responsável por uma única validação e decide se a chain deve continuar, parar por erro ou finalizar com sucesso — tudo controlado pelo `HandlerStatus` no `TransactionContext`.
 
+Isolamento de responsabilidades:
 1. **CardExistenceHandler** — verifica se o cartão existe (com lock pessimista)
 2. **PasswordValidationHandler** — valida a senha
 3. **BalanceValidationHandler** — valida se há saldo suficiente
 4. **DebitHandler** — debita o valor e persiste o cartão atualizado
+
+Cada handler define `CONTINUE`, `STOP` ou `SUCCESS` no contexto. Se `STOP`, a exception armazenada é relançada pelo `TransactionExecutor` e tratada centralizadamente pelo `ApiExceptionHandler`, eliminando `throw`s espalhados pela chain e mantendo o fluxo previsível e testável.
 
 - `201` — Transação aprovada
 - `400` — Dados inválidos
