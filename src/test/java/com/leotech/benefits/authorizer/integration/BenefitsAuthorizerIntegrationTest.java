@@ -1,6 +1,9 @@
 package com.leotech.benefits.authorizer.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
+import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
+import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -110,7 +113,7 @@ class BenefitsAuthorizerIntegrationTest {
             assertThat(result.status()).isEqualTo(201);
 
             final var response = objectMapper.readValue(result.body(), CreateCardResponse.class);
-            assertThat(response.numeroCartao()).isEqualTo("1111111111111111");
+            assertThat(response.cardNumber()).isEqualTo("1111111111111111");
         }
 
         @Test
@@ -291,12 +294,4 @@ class BenefitsAuthorizerIntegrationTest {
         }
     }
 
-    record CreateCardRequest(String numeroCartao, String senha) {
-    }
-
-    record CreateCardResponse(String numeroCartao) {
-    }
-
-    record CreateTransactionRequest(String numeroCartao, String senhaCartao, BigDecimal valor) {
-    }
 }
