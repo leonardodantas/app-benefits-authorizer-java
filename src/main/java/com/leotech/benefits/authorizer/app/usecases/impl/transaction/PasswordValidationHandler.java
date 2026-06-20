@@ -3,13 +3,12 @@ package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 import com.leotech.benefits.authorizer.app.services.PasswordEncoder;
 import com.leotech.benefits.authorizer.domain.transaction.InvalidPasswordException;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class PasswordValidationHandler extends TransactionHandler {
 
     private final PasswordEncoder passwordEncoder;
-
-    public PasswordValidationHandler(final PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     protected void doHandle(final TransactionContext context) {
