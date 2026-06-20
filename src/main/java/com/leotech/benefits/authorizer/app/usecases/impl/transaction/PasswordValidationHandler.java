@@ -13,8 +13,12 @@ public class PasswordValidationHandler extends TransactionHandler {
 
     @Override
     protected void doHandle(final TransactionContext context) {
-        if (!passwordEncoder.matches(context.transaction().password(), context.card().password())) {
-            throw new InvalidPasswordException();
+        if (passwordEncoder.matches(context.transaction().password(), context.card().password())) {
+            context.setStatus(HandlerStatus.CONTINUE);
+            return;
         }
+
+        context.setStatus(HandlerStatus.STOP);
+        context.setException(new InvalidPasswordException());
     }
 }

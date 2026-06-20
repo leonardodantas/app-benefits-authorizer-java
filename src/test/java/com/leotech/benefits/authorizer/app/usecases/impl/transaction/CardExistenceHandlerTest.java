@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,17 +56,18 @@ class CardExistenceHandlerTest {
     class WhenCardDoesNotExist {
 
         @Test
-        @DisplayName("should throw CardNotExistsException")
-        void shouldThrowCardNotExistsException() {
+        @DisplayName("should set STOP status and exception")
+        void shouldSetStopStatusAndException() {
             when(cardRepository.findWithLockByCardNumber("123")).thenReturn(Optional.empty());
 
             final CardExistenceHandler handler = new CardExistenceHandler(cardRepository);
             final TransactionContext context = new TransactionContext(transaction);
 
-            assertThatThrownBy(() -> handler.doHandle(context))
-                    .isInstanceOf(CardNotExistsException.class)
-                    .hasMessage("CARTAO_INEXISTENTE");
+            handler.doHandle(context);
 
+            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.exception()).isInstanceOf(CardNotExistsException.class);
+            assertThat(context.exception()).hasMessage("CARTAO_INEXISTENTE");
             verify(cardRepository).findWithLockByCardNumber("123");
             verifyNoMoreInteractions(cardRepository);
         }

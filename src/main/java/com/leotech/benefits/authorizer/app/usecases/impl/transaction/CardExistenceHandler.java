@@ -4,6 +4,8 @@ import com.leotech.benefits.authorizer.app.repositories.CardRepository;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 
+import java.util.Optional;
+
 public class CardExistenceHandler extends TransactionHandler {
 
     private final CardRepository cardRepository;
@@ -15,8 +17,15 @@ public class CardExistenceHandler extends TransactionHandler {
     @Override
     protected void doHandle(final TransactionContext context) {
         final String cardNumber = context.transaction().cardNumber();
-        final Card card = cardRepository.findWithLockByCardNumber(cardNumber)
-                .orElseThrow(() -> new CardNotExistsException(cardNumber));
-        context.setCard(card);
+        final Optional<Card> optionalCard = cardRepository.findWithLockByCardNumber(cardNumber);
+
+        if (optionalCard.isPresent()) {
+            context.setCard(optionalCard.get());
+            context.setStatus(HandlerStatus.CONTINUE);
+            return;
+        }
+
+        context.setStatus(HandlerStatus.STOP);
+        context.setException(new CardNotExistsException());
     }
 }

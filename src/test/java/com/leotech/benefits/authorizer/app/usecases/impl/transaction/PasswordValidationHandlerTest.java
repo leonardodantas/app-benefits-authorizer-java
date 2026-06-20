@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,8 +33,8 @@ class PasswordValidationHandlerTest {
     class WhenPasswordMatches {
 
         @Test
-        @DisplayName("should not throw exception")
-        void shouldNotThrow() {
+        @DisplayName("should set CONTINUE status")
+        void shouldSetContinueStatus() {
             final Transaction transaction = new Transaction("123", "raw-password", BigDecimal.TEN);
             when(passwordEncoder.matches("raw-password", "encrypted-password")).thenReturn(true);
 
@@ -44,6 +44,8 @@ class PasswordValidationHandlerTest {
 
             handler.doHandle(context);
 
+            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.exception()).isNull();
             verify(passwordEncoder).matches("raw-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }
@@ -54,8 +56,8 @@ class PasswordValidationHandlerTest {
     class WhenPasswordDoesNotMatch {
 
         @Test
-        @DisplayName("should throw InvalidPasswordException")
-        void shouldThrow() {
+        @DisplayName("should set STOP status and exception")
+        void shouldSetStopStatusAndException() {
             final Transaction transaction = new Transaction("123", "wrong-password", BigDecimal.TEN);
             when(passwordEncoder.matches("wrong-password", "encrypted-password")).thenReturn(false);
 
@@ -63,10 +65,11 @@ class PasswordValidationHandlerTest {
             final TransactionContext context = new TransactionContext(transaction);
             context.setCard(card);
 
-            assertThatThrownBy(() -> handler.doHandle(context))
-                    .isInstanceOf(InvalidPasswordException.class)
-                    .hasMessage("SENHA_INVALIDA");
+            handler.doHandle(context);
 
+            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.exception()).isInstanceOf(InvalidPasswordException.class);
+            assertThat(context.exception()).hasMessage("SENHA_INVALIDA");
             verify(passwordEncoder).matches("wrong-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }

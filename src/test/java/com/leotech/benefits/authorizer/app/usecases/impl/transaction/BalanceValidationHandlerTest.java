@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BalanceValidationHandlerTest {
 
@@ -19,8 +18,8 @@ class BalanceValidationHandlerTest {
     class WhenBalanceIsSufficient {
 
         @Test
-        @DisplayName("should not throw exception")
-        void shouldNotThrow() {
+        @DisplayName("should set CONTINUE status")
+        void shouldSetContinueStatus() {
             final Card card = Card.builder()
                     .cardNumber("123")
                     .balance(new BigDecimal("50.00"))
@@ -31,8 +30,10 @@ class BalanceValidationHandlerTest {
             final TransactionContext context = new TransactionContext(transaction);
             context.setCard(card);
 
-            assertThatCode(() -> handler.doHandle(context))
-                    .doesNotThrowAnyException();
+            handler.doHandle(context);
+
+            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.exception()).isNull();
         }
     }
 
@@ -41,8 +42,8 @@ class BalanceValidationHandlerTest {
     class WhenBalanceIsEqualToAmount {
 
         @Test
-        @DisplayName("should not throw exception")
-        void shouldNotThrow() {
+        @DisplayName("should set CONTINUE status")
+        void shouldSetContinueStatus() {
             final Card card = Card.builder()
                     .cardNumber("123")
                     .balance(new BigDecimal("30.00"))
@@ -53,8 +54,10 @@ class BalanceValidationHandlerTest {
             final TransactionContext context = new TransactionContext(transaction);
             context.setCard(card);
 
-            assertThatCode(() -> handler.doHandle(context))
-                    .doesNotThrowAnyException();
+            handler.doHandle(context);
+
+            assertThat(context.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(context.exception()).isNull();
         }
     }
 
@@ -63,8 +66,8 @@ class BalanceValidationHandlerTest {
     class WhenBalanceIsInsufficient {
 
         @Test
-        @DisplayName("should throw InsufficientBalanceException")
-        void shouldThrow() {
+        @DisplayName("should set STOP status and exception")
+        void shouldSetStopStatusAndException() {
             final Card card = Card.builder()
                     .cardNumber("123")
                     .balance(new BigDecimal("10.00"))
@@ -75,9 +78,11 @@ class BalanceValidationHandlerTest {
             final TransactionContext context = new TransactionContext(transaction);
             context.setCard(card);
 
-            assertThatThrownBy(() -> handler.doHandle(context))
-                    .isInstanceOf(InsufficientBalanceException.class)
-                    .hasMessage("SALDO_INSUFICIENTE");
+            handler.doHandle(context);
+
+            assertThat(context.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(context.exception()).isInstanceOf(InsufficientBalanceException.class);
+            assertThat(context.exception()).hasMessage("SALDO_INSUFICIENTE");
         }
     }
 }
