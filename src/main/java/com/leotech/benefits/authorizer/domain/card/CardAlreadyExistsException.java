@@ -1,6 +1,8 @@
 package com.leotech.benefits.authorizer.domain.card;
 
-public class CardAlreadyExistsException extends RuntimeException {
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
+
+public class CardAlreadyExistsException extends CustomException {
 
     public CardAlreadyExistsException(final String cardNumber) {
         super("Card " + cardNumber + " already exists");

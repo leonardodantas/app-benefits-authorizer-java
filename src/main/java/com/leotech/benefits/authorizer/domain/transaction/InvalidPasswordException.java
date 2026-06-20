@@ -1,6 +1,8 @@
 package com.leotech.benefits.authorizer.domain.transaction;
 
-public class InvalidPasswordException extends RuntimeException {
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
+
+public class InvalidPasswordException extends CustomException {
 
     public InvalidPasswordException() {
         super("SENHA_INVALIDA");

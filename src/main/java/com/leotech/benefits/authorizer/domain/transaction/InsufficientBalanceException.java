@@ -1,6 +1,8 @@
 package com.leotech.benefits.authorizer.domain.transaction;
 
-public class InsufficientBalanceException extends RuntimeException {
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
+
+public class InsufficientBalanceException extends CustomException {
 
     public InsufficientBalanceException() {
         super("SALDO_INSUFICIENTE");

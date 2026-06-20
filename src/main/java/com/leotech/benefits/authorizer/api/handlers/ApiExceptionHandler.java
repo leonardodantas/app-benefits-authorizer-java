@@ -3,6 +3,7 @@ package com.leotech.benefits.authorizer.api.handlers;
 import com.leotech.benefits.authorizer.api.responses.ErrorResponse;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
 import com.leotech.benefits.authorizer.domain.card.CardNotFoundException;
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.InsufficientBalanceException;
 import com.leotech.benefits.authorizer.domain.transaction.InvalidPasswordException;
@@ -61,6 +62,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<String> handleInsufficientBalance(final InsufficientBalanceException ex) {
+        return ResponseEntity.status(422).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<String> handleCustomException(final CustomException ex) {
         return ResponseEntity.status(422).body(ex.getMessage());
     }
 

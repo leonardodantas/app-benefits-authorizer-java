@@ -1,8 +1,10 @@
 package com.leotech.benefits.authorizer.domain.transaction;
 
-public class CardNotExistsException extends RuntimeException {
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
 
-    public CardNotExistsException(final String cardNumber) {
+public class CardNotExistsException extends CustomException {
+
+    public CardNotExistsException() {
         super("CARTAO_INEXISTENTE");
     }
 }
