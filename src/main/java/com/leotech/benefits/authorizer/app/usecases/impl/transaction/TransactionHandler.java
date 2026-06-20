@@ -1,5 +1,7 @@
 package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 
+import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemException;
+
 import java.util.Objects;
 
 public abstract class TransactionHandler {
@@ -11,9 +13,14 @@ public abstract class TransactionHandler {
     }
 
     public final void handle(final TransactionContext context) {
-        doHandle(context);
-        if (context.status() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
-            next.handle(context);
+        try {
+            doHandle(context);
+            if (context.status() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
+                next.handle(context);
+            }
+        } catch (final RuntimeException e) {
+            context.setStatus(HandlerStatus.STOP);
+            context.setException(new TransactionSystemException());
         }
     }
 
