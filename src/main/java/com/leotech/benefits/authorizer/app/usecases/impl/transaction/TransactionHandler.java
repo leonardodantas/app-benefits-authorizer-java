@@ -16,7 +16,7 @@ public abstract class TransactionHandler {
         try {
             doHandle(context);
             if (context.status() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
-                next.handle(context);
+                next.handle(context);;
             }
         } catch (final RuntimeException e) {
             context.setStatus(HandlerStatus.STOP);
