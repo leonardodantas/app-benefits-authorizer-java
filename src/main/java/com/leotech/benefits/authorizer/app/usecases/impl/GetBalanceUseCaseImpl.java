@@ -17,9 +17,8 @@ public class GetBalanceUseCaseImpl implements GetBalanceUseCase {
 
     @Override
     public BigDecimal execute(final String cardNumber) {
-        final Card card = cardRepository.findByCardNumber(cardNumber)
+        return cardRepository.findByCardNumber(cardNumber)
+                .map(Card::balance)
                 .orElseThrow(() -> new CardNotFoundException(cardNumber));
-
-        return card.balance();
     }
 }

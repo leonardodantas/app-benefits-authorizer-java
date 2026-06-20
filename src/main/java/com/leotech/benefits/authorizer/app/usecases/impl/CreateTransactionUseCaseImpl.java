@@ -20,14 +20,14 @@ public class CreateTransactionUseCaseImpl implements CreateTransactionUseCase {
     @Override
     @Transactional
     public void execute(final Transaction transaction) {
-        final TransactionContext ctx = new TransactionContext(transaction);
+        final TransactionContext transactionContext = new TransactionContext(transaction);
 
-        transactionChain.handle(ctx);
+        transactionChain.handle(transactionContext);
 
-        final Card updated = ctx.card().toBuilder()
-                .balance(ctx.card().balance().subtract(transaction.amount()))
+        final Card cardUpdated = transactionContext.card().toBuilder()
+                .balance(transactionContext.card().balance().subtract(transaction.amount()))
                 .build();
 
-        cardRepository.save(updated);
+        cardRepository.save(cardUpdated);
     }
 }
