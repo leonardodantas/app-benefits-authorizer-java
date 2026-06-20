@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
+import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 
 import java.util.Optional;
