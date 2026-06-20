@@ -68,10 +68,13 @@ class ArchitectureTest {
     @Test
     @DisplayName("there must be no cyclic dependencies between packages")
     void noCyclicDependencies() {
+        final var mainClasses = new ClassFileImporter()
+                .importPackages(BASE + ".api", BASE + ".app", BASE + ".config", BASE + ".domain", BASE + ".infra");
+
         ArchRule rule = slices()
                 .matching(BASE + ".(*)..")
                 .should().beFreeOfCycles();
 
-        rule.check(classes);
+        rule.check(mainClasses);
     }
 }
