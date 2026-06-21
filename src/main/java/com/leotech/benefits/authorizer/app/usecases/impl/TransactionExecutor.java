@@ -5,8 +5,11 @@ import com.leotech.benefits.authorizer.app.usecases.impl.transaction.Transaction
 import com.leotech.benefits.authorizer.app.usecases.impl.transaction.TransactionHandler;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.shared.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class TransactionExecutor {
 
     private final TransactionHandler chain;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Card execute(final Transaction transaction) {
         log.info("Starting transaction execution for card {}", transaction.cardNumber());
@@ -23,10 +27,20 @@ public class TransactionExecutor {
 
         if (context.getStatus() == HandlerStatus.STOP && context.getException() != null) {
             log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.getException().getMessage());
+            eventPublisher.publishEvent(TransactionEvent.error(
+                    transaction.cardNumber(),
+                    context.getException().getMessage()
+            ));
             throw context.getException();
         }
 
         log.info("Transaction executed successfully for card {}", transaction.cardNumber());
+        eventPublisher.publishEvent(TransactionEvent.success(
+                context.getCard().cardNumber(),
+                context.getCard().balance().add(transaction.amount()),
+                context.getCard().balance(),
+                transaction.amount()
+        ));
         return context.getCard();
     }
 }
