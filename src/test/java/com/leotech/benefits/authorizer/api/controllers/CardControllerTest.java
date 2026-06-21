@@ -2,22 +2,17 @@ package com.leotech.benefits.authorizer.api.controllers;
 
 import com.leotech.benefits.authorizer.api.handlers.ApiExceptionHandler;
 import com.leotech.benefits.authorizer.api.mappers.CardMapper;
-import com.leotech.benefits.authorizer.api.mappers.TransactionMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.responses.CardSummaryResponse;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
-import com.leotech.benefits.authorizer.api.responses.TransactionLogResponse;
 import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
-import com.leotech.benefits.authorizer.app.usecases.GetTransactionHistoryUseCase;
 import com.leotech.benefits.authorizer.app.usecases.ListCardsUseCase;
 import com.leotech.benefits.authorizer.app.usecases.UpdateCardStatusUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
 import com.leotech.benefits.authorizer.domain.card.CardNotFoundException;
 import com.leotech.benefits.authorizer.domain.card.CardStatus;
-import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
-import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +27,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -58,16 +52,10 @@ class CardControllerTest {
     private ListCardsUseCase listCardsUseCase;
 
     @MockitoBean
-    private GetTransactionHistoryUseCase getTransactionHistoryUseCase;
-
-    @MockitoBean
     private UpdateCardStatusUseCase updateCardStatusUseCase;
 
     @MockitoBean
     private CardMapper cardMapper;
-
-    @MockitoBean
-    private TransactionMapper transactionMapper;
 
     private static final String CARD_NUMBER = "1234567890123456";
     private static final String PASSWORD = "1234";
@@ -281,72 +269,4 @@ class CardControllerTest {
         }
     }
 
-    @Nested
-    @DisplayName("GET /cartoes/{numeroCartao}/transacoes")
-    class GetTransactionHistory {
-
-        @Test
-        @DisplayName("should return 200 and paginated history")
-        void shouldReturn200() throws Exception {
-            final TransactionEvent event = TransactionEvent.success(
-                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"), new BigDecimal("30.00"));
-            final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
-            final TransactionLogResponse response = new TransactionLogResponse(
-                    CARD_NUMBER, TransactionStatus.SUCCESS,
-                    "TRANSACAO_APROVADA", new BigDecimal("100.00"), new BigDecimal("70.00"),
-                    new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
-
-            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20))).thenReturn(page);
-            when(transactionMapper.toResponse(event)).thenReturn(response);
-
-            mockMvc.perform(get("/cartoes/{numeroCartao}/transacoes", CARD_NUMBER))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[0].numeroCartao").value(CARD_NUMBER))
-                    .andExpect(jsonPath("$.content[0].valor").value(30.00));
-
-            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20));
-            verify(transactionMapper).toResponse(event);
-        }
-
-        @Test
-        @DisplayName("should return 200 with empty page when no transactions")
-        void shouldReturn200Empty() throws Exception {
-            final Page<TransactionEvent> emptyPage = Page.empty();
-
-            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20))).thenReturn(emptyPage);
-
-            mockMvc.perform(get("/cartoes/{numeroCartao}/transacoes", CARD_NUMBER))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isEmpty())
-                    .andExpect(jsonPath("$.totalElements").value(0));
-
-            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20));
-            verifyNoInteractions(transactionMapper);
-        }
-
-        @Test
-        @DisplayName("should return 200 filtered by status")
-        void shouldReturn200FilteredByStatus() throws Exception {
-            final TransactionEvent event = TransactionEvent.success(
-                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"), new BigDecimal("30.00"));
-            final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
-            final TransactionLogResponse response = new TransactionLogResponse(
-                    CARD_NUMBER, TransactionStatus.SUCCESS,
-                    "TRANSACAO_APROVADA", new BigDecimal("100.00"), new BigDecimal("70.00"),
-                    new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
-
-            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), eq(TransactionStatus.SUCCESS), eq(0), eq(20)))
-                    .thenReturn(page);
-            when(transactionMapper.toResponse(event)).thenReturn(response);
-
-            mockMvc.perform(get("/cartoes/{numeroCartao}/transacoes", CARD_NUMBER)
-                            .param("status", "SUCCESS"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[0].numeroCartao").value(CARD_NUMBER))
-                    .andExpect(jsonPath("$.content[0].status").value("SUCCESS"));
-
-            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), eq(TransactionStatus.SUCCESS), eq(0), eq(20));
-            verify(transactionMapper).toResponse(event);
-        }
-    }
 }

@@ -34,6 +34,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -295,16 +296,18 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return 200 with paginated history and success status")
         void shouldReturn200() {
-            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
+            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
 
-            assertThat(result.status()).isEqualTo(200);
-            assertThat(result.body()).contains("\"status\":\"SUCCESS\"");
-            assertThat(result.body()).contains("\"mensagem\":\"TRANSACAO_APROVADA\"");
-            assertThat(result.body()).contains("numeroCartao");
-            assertThat(result.body()).contains("saldoAnterior");
-            assertThat(result.body()).contains("novoSaldo");
-            assertThat(result.body()).contains("valor");
-            assertThat(result.body()).contains("dataHora");
+                assertThat(result.status()).isEqualTo(200);
+                assertThat(result.body()).contains("\"status\":\"SUCCESS\"");
+                assertThat(result.body()).contains("\"mensagem\":\"TRANSACAO_APROVADA\"");
+                assertThat(result.body()).contains("numeroCartao");
+                assertThat(result.body()).contains("saldoAnterior");
+                assertThat(result.body()).contains("novoSaldo");
+                assertThat(result.body()).contains("valor");
+                assertThat(result.body()).contains("dataHora");
+            });
         }
 
         @Test
@@ -332,23 +335,27 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should persist error event in history")
         void shouldPersistErrorEvent() {
-            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
+            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
 
-            assertThat(result.status()).isEqualTo(200);
-            assertThat(result.body()).contains("\"status\":\"ERROR\"");
-            assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
-            assertThat(result.body()).contains("\"saldoAnterior\":null");
-            assertThat(result.body()).contains("\"novoSaldo\":null");
+                assertThat(result.status()).isEqualTo(200);
+                assertThat(result.body()).contains("\"status\":\"ERROR\"");
+                assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
+                assertThat(result.body()).contains("\"saldoAnterior\":null");
+                assertThat(result.body()).contains("\"novoSaldo\":null");
+            });
         }
 
         @Test
         @DisplayName("should filter by ERROR status")
         void shouldFilterByErrorStatus() {
-            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?status=ERROR&page=0&size=20");
+            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?status=ERROR&page=0&size=20");
 
-            assertThat(result.status()).isEqualTo(200);
-            assertThat(result.body()).contains("\"status\":\"ERROR\"");
-            assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
+                assertThat(result.status()).isEqualTo(200);
+                assertThat(result.body()).contains("\"status\":\"ERROR\"");
+                assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
+            });
         }
 
         @Test
