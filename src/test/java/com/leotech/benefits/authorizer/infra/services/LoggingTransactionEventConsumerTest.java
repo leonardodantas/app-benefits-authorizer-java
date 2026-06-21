@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.infra.services;
 
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import com.leotech.benefits.authorizer.infra.entities.TransactionLogEntity;
 import com.leotech.benefits.authorizer.infra.mappers.TransactionLogInfraMapper;
 import com.leotech.benefits.authorizer.infra.repositories.JpaTransactionLogRepository;
@@ -37,16 +38,17 @@ class LoggingTransactionEventConsumerTest {
     @Test
     @DisplayName("should persist transaction event")
     void shouldPersistEvent() {
-        final TransactionEvent event = new TransactionEvent(
+        final TransactionEvent event = TransactionEvent.success(
                 "1234567890123456",
                 new BigDecimal("100.00"),
                 new BigDecimal("70.00"),
-                new BigDecimal("30.00"),
-                LocalDateTime.of(2026, 6, 20, 10, 0)
+                new BigDecimal("30.00")
         );
 
         final TransactionLogEntity entity = TransactionLogEntity.builder()
                 .cardNumber("1234567890123456")
+                .status(TransactionStatus.SUCCESS)
+                .message("TRANSACAO_APROVADA")
                 .previousBalance(new BigDecimal("100.00"))
                 .newBalance(new BigDecimal("70.00"))
                 .amount(new BigDecimal("30.00"))
@@ -62,9 +64,41 @@ class LoggingTransactionEventConsumerTest {
         final TransactionLogEntity savedEntity = entityCaptor.getValue();
 
         assertThat(savedEntity.getCardNumber()).isEqualTo("1234567890123456");
+        assertThat(savedEntity.getStatus()).isEqualTo(TransactionStatus.SUCCESS);
+        assertThat(savedEntity.getMessage()).isEqualTo("TRANSACAO_APROVADA");
         assertThat(savedEntity.getPreviousBalance()).isEqualByComparingTo(new BigDecimal("100.00"));
         assertThat(savedEntity.getNewBalance()).isEqualByComparingTo(new BigDecimal("70.00"));
         assertThat(savedEntity.getAmount()).isEqualByComparingTo(new BigDecimal("30.00"));
+
+        verifyNoMoreInteractions(transactionLogRepository);
+    }
+
+    @Test
+    @DisplayName("should persist error event")
+    void shouldPersistErrorEvent() {
+        final TransactionEvent event = TransactionEvent.error("1234567890123456", "SALDO_INSUFICIENTE");
+
+        final TransactionLogEntity entity = TransactionLogEntity.builder()
+                .cardNumber("1234567890123456")
+                .status(TransactionStatus.ERROR)
+                .message("SALDO_INSUFICIENTE")
+                .build();
+
+        when(transactionLogInfraMapper.toEntity(event)).thenReturn(entity);
+
+        consumer.consume(event);
+
+        verify(transactionLogInfraMapper).toEntity(event);
+        verify(transactionLogRepository).save(entityCaptor.capture());
+
+        final TransactionLogEntity savedEntity = entityCaptor.getValue();
+
+        assertThat(savedEntity.getCardNumber()).isEqualTo("1234567890123456");
+        assertThat(savedEntity.getStatus()).isEqualTo(TransactionStatus.ERROR);
+        assertThat(savedEntity.getMessage()).isEqualTo("SALDO_INSUFICIENTE");
+        assertThat(savedEntity.getPreviousBalance()).isNull();
+        assertThat(savedEntity.getNewBalance()).isNull();
+        assertThat(savedEntity.getAmount()).isNull();
 
         verifyNoMoreInteractions(transactionLogRepository);
     }

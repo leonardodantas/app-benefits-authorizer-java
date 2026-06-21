@@ -11,6 +11,7 @@ import com.leotech.benefits.authorizer.domain.transaction.InsufficientBalanceExc
 import com.leotech.benefits.authorizer.domain.transaction.InvalidPasswordException;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -174,12 +175,12 @@ class TransactionControllerTest {
         @Test
         @DisplayName("should return 200 and paginated history")
         void shouldReturn200() throws Exception {
-            final TransactionEvent event = new TransactionEvent(
-                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"),
-                    new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
+            final TransactionEvent event = TransactionEvent.success(
+                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"), new BigDecimal("30.00"));
             final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
             final TransactionLogResponse response = new TransactionLogResponse(
-                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"),
+                    CARD_NUMBER, TransactionStatus.SUCCESS,
+                    "TRANSACAO_APROVADA", new BigDecimal("100.00"), new BigDecimal("70.00"),
                     new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
 
             when(getTransactionHistoryUseCase.execute(CARD_NUMBER, 0, 20)).thenReturn(page);
