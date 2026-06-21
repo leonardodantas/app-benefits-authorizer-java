@@ -1,8 +1,11 @@
 package com.leotech.benefits.authorizer.infra.entities;
 
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,13 +36,20 @@ public class TransactionLogEntity {
     @Column(name = "card_number", nullable = false)
     private String cardNumber;
 
-    @Column(name = "previous_balance", nullable = false, precision = 15, scale = 2)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TransactionStatus status;
+
+    @Column(nullable = false, length = 255)
+    private String message;
+
+    @Column(name = "previous_balance", precision = 15, scale = 2)
     private BigDecimal previousBalance;
 
-    @Column(name = "new_balance", nullable = false, precision = 15, scale = 2)
+    @Column(name = "new_balance", precision = 15, scale = 2)
     private BigDecimal newBalance;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(precision = 15, scale = 2)
     private BigDecimal amount;
 
     @CreatedDate

@@ -1,0 +1,6 @@
+ALTER TABLE transaction_log
+    ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+    ADD COLUMN message VARCHAR(255) NOT NULL DEFAULT '',
+    MODIFY previous_balance DECIMAL(15, 2) NULL,
+    MODIFY new_balance DECIMAL(15, 2) NULL,
+    MODIFY amount DECIMAL(15, 2) NULL;
