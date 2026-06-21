@@ -8,6 +8,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 class ArchitectureTest {
 
+    private static final String BASE = "com.leotech.benefits.authorizer";
+
     @Test
     @DisplayName("domain must not depend on any other layer")
     void domainMustNotDependOnOtherLayers() {
