@@ -8,15 +8,13 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 class ArchitectureTest {
 
-    private static final String BASE = "com.leotech.benefits.authorizer";
-
     @Test
     @DisplayName("domain must not depend on any other layer")
     void domainMustNotDependOnOtherLayers() {
         noClasses()
                 .that().resideInAPackage("..domain..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage(BASE + ".api", BASE + ".app..", BASE + ".infra", BASE + ".config")
+                .resideInAnyPackage("..api..", "..app..", "..infra..", "..config..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -24,9 +22,9 @@ class ArchitectureTest {
     @DisplayName("api must not depend directly on infra")
     void apiMustNotDependOnInfra() {
         noClasses()
-                .that().resideInAPackage(BASE + ".api")
+                .that().resideInAPackage("..api..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage(BASE + ".infra")
+                .resideInAnyPackage("..infra..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -34,9 +32,9 @@ class ArchitectureTest {
     @DisplayName("app must not depend on api or infra")
     void appMustNotDependOnApiOrInfra() {
         noClasses()
-                .that().resideInAPackage(BASE + ".app..")
+                .that().resideInAPackage("..app..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage(BASE + ".api", BASE + ".infra")
+                .resideInAnyPackage("..api..", "..infra..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -44,9 +42,9 @@ class ArchitectureTest {
     @DisplayName("infra must not depend on api or config")
     void infraMustNotDependOnApiOrConfig() {
         noClasses()
-                .that().resideInAPackage(BASE + ".infra")
+                .that().resideInAPackage("..infra..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage(BASE + ".api", BASE + ".config")
+                .resideInAnyPackage("..api..", "..config..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 }
