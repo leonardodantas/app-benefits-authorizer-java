@@ -32,7 +32,7 @@ class LoggingTransactionEventConsumerTest {
     private LoggingTransactionEventConsumer consumer;
 
     @Captor
-    private ArgumentCaptor<com.leotech.benefits.authorizer.infra.entities.TransactionLogEntity> entityCaptor;
+    private ArgumentCaptor<TransactionLogEntity> entityCaptor;
 
     @Test
     @DisplayName("should persist transaction event")

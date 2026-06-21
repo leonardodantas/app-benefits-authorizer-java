@@ -25,4 +25,3 @@ public class LoggingTransactionEventConsumer implements TransactionEventConsumer
         log.info("Transaction event persisted for card {}", event.cardNumber());
     }
 }
-}
