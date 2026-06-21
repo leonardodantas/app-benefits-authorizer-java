@@ -59,12 +59,12 @@ class LoggingTransactionEventConsumerTest {
         verify(transactionLogInfraMapper).toEntity(event);
         verify(transactionLogRepository).save(entityCaptor.capture());
 
-        final var entity = entityCaptor.getValue();
+        final TransactionLogEntity savedEntity = entityCaptor.getValue();
 
-        assertThat(entity.getCardNumber()).isEqualTo("1234567890123456");
-        assertThat(entity.getPreviousBalance()).isEqualByComparingTo(new BigDecimal("100.00"));
-        assertThat(entity.getNewBalance()).isEqualByComparingTo(new BigDecimal("70.00"));
-        assertThat(entity.getAmount()).isEqualByComparingTo(new BigDecimal("30.00"));
+        assertThat(savedEntity.getCardNumber()).isEqualTo("1234567890123456");
+        assertThat(savedEntity.getPreviousBalance()).isEqualByComparingTo(new BigDecimal("100.00"));
+        assertThat(savedEntity.getNewBalance()).isEqualByComparingTo(new BigDecimal("70.00"));
+        assertThat(savedEntity.getAmount()).isEqualByComparingTo(new BigDecimal("30.00"));
 
         verifyNoMoreInteractions(transactionLogRepository);
     }
