@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.arch;
 
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,10 @@ class ArchitectureTest {
 
     private static final String BASE = "com.leotech.benefits.authorizer";
 
+    private static ClassFileImporter importer() {
+        return new ClassFileImporter().withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
+    }
+
     @Test
     @DisplayName("domain must not depend on any other layer")
     void domainMustNotDependOnOtherLayers() {
@@ -17,7 +22,7 @@ class ArchitectureTest {
                 .that().resideInAPackage("..domain..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".app..", BASE + ".infra..", BASE + ".config")
-                .check(new ClassFileImporter().importPackages(BASE));
+                .check(importer().importPackages(BASE));
     }
 
     @Test
@@ -27,7 +32,7 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".api..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".infra..")
-                .check(new ClassFileImporter().importPackages(BASE));
+                .check(importer().importPackages(BASE));
     }
 
     @Test
@@ -37,7 +42,7 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".app..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".infra..")
-                .check(new ClassFileImporter().importPackages(BASE));
+                .check(importer().importPackages(BASE));
     }
 
     @Test
@@ -47,6 +52,6 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".infra..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".config")
-                .check(new ClassFileImporter().importPackages(BASE));
+                .check(importer().importPackages(BASE));
     }
 }
