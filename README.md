@@ -125,14 +125,7 @@ Retorna o histórico paginado de transações de um cartão, ordenado da mais re
 
 ## Idempotência
 
-| Endpoint | Idempotente | Comportamento |
-|---|---|---|
-| `PATCH /cartoes/{numeroCartao}` | ✅ Sim | Se o status solicitado já é o atual, o update é ignorado — nenhuma escrita no banco |
-| `POST /cartoes` | ❌ Não | Cada chamada cria um novo cartão; retorna `422` se o número já existir |
-| `POST /transacoes` | ❌ Não | Cada chamada processa uma nova transação e debita o valor |
-| `GET *` | ✅ Sim | Consultas são intrinsicamente idempotentes |
-
-A idempotência do `PATCH` é implementada no use case: antes de persistir, o status atual é comparado com o solicitado. Se iguais, o método retorna sem chamar o repositório, evitando escritas desnecessárias e locks desnecessários.
+Recursos idempotentes garantem que múltiplas chamadas idênticas produzam o mesmo resultado que uma única chamada, sem efeitos colaterais extras. No projeto, o `PATCH /cartoes/{numeroCartao}` é idempotente — se o cartão já estiver no status solicitado, nenhuma escrita no banco é realizada. Consultas (`GET`) são naturalmente idempotentes. Já criações (`POST`) não o são, pois cada requisição gera um novo recurso.
 
 ## Concorrência
 
