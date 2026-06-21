@@ -7,8 +7,10 @@ import com.leotech.benefits.authorizer.infra.mappers.TransactionLogInfraMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,8 +29,8 @@ class TransactionLogRepositoryImplTest {
     @Mock
     private JpaTransactionLogRepository jpaTransactionLogRepository;
 
-    @Mock
-    private TransactionLogInfraMapper transactionLogInfraMapper;
+    @Spy
+    private TransactionLogInfraMapper transactionLogInfraMapper = Mappers.getMapper(TransactionLogInfraMapper.class);
 
     @InjectMocks
     private TransactionLogRepositoryImpl repository;
@@ -39,29 +41,28 @@ class TransactionLogRepositoryImplTest {
         final TransactionLogEntity entity = TransactionLogEntity.builder()
                 .cardNumber("1234567890123456")
                 .status(TransactionStatus.SUCCESS)
-                .message("ok")
+                .message("TRANSACAO_APROVADA")
                 .previousBalance(new BigDecimal("100.00"))
                 .newBalance(new BigDecimal("70.00"))
                 .amount(new BigDecimal("30.00"))
                 .timestamp(LocalDateTime.now())
                 .build();
-        final TransactionEvent event = new TransactionEvent(
-                "1234567890123456", new BigDecimal("100.00"), new BigDecimal("70.00"),
-                new BigDecimal("30.00"), LocalDateTime.now(), TransactionStatus.SUCCESS, "ok");
         final Page<TransactionLogEntity> entityPage = new PageImpl<>(List.of(entity));
         final PageRequest pageRequest = PageRequest.of(0, 20);
 
         when(jpaTransactionLogRepository.findByCardNumberOrderByTimestampDesc("1234567890123456", pageRequest))
                 .thenReturn(entityPage);
-        when(transactionLogInfraMapper.toDomain(entity)).thenReturn(event);
 
         final Page<TransactionEvent> result = repository.findByCardNumber("1234567890123456", pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().cardNumber()).isEqualTo("1234567890123456");
+        assertThat(result.getContent().getFirst().status()).isEqualTo(TransactionStatus.SUCCESS);
+        assertThat(result.getContent().getFirst().message()).isEqualTo("TRANSACAO_APROVADA");
+        assertThat(result.getContent().getFirst().previousBalance()).isEqualByComparingTo(new BigDecimal("100.00"));
+        assertThat(result.getContent().getFirst().newBalance()).isEqualByComparingTo(new BigDecimal("70.00"));
+        assertThat(result.getContent().getFirst().amount()).isEqualByComparingTo(new BigDecimal("30.00"));
         verify(jpaTransactionLogRepository).findByCardNumberOrderByTimestampDesc("1234567890123456", pageRequest);
-        verify(transactionLogInfraMapper).toDomain(entity);
-        verifyNoMoreInteractions(jpaTransactionLogRepository, transactionLogInfraMapper);
     }
 
     @Test
@@ -86,27 +87,25 @@ class TransactionLogRepositoryImplTest {
         final TransactionLogEntity entity = TransactionLogEntity.builder()
                 .cardNumber("1234567890123456")
                 .status(TransactionStatus.ERROR)
-                .message("erro")
+                .message("SALDO_INSUFICIENTE")
                 .build();
-        final TransactionEvent event = new TransactionEvent(
-                "1234567890123456", null, null, null, LocalDateTime.now(),
-                TransactionStatus.ERROR, "erro");
         final Page<TransactionLogEntity> entityPage = new PageImpl<>(List.of(entity));
         final PageRequest pageRequest = PageRequest.of(0, 20);
 
         when(jpaTransactionLogRepository.findByCardNumberAndStatusOrderByTimestampDesc(
                 "1234567890123456", TransactionStatus.ERROR, pageRequest))
                 .thenReturn(entityPage);
-        when(transactionLogInfraMapper.toDomain(entity)).thenReturn(event);
 
         final Page<TransactionEvent> result = repository.findByCardNumber(
                 "1234567890123456", TransactionStatus.ERROR, pageRequest);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().status()).isEqualTo(TransactionStatus.ERROR);
+        assertThat(result.getContent().getFirst().message()).isEqualTo("SALDO_INSUFICIENTE");
+        assertThat(result.getContent().getFirst().previousBalance()).isNull();
+        assertThat(result.getContent().getFirst().newBalance()).isNull();
+        assertThat(result.getContent().getFirst().amount()).isNull();
         verify(jpaTransactionLogRepository).findByCardNumberAndStatusOrderByTimestampDesc(
                 "1234567890123456", TransactionStatus.ERROR, pageRequest);
-        verify(transactionLogInfraMapper).toDomain(entity);
-        verifyNoMoreInteractions(jpaTransactionLogRepository, transactionLogInfraMapper);
     }
 }
