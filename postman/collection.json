@@ -51,6 +51,21 @@
 					"path": ["transacoes"]
 				}
 			}
+		},
+		{
+			"name": "Histórico de transações",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "http://localhost:8080/transacoes/6549873025634501?page=0&size=20",
+					"host": ["http://localhost:8080"],
+					"path": ["transacoes", "6549873025634501"],
+					"query": [
+						{ "key": "page", "value": "0" },
+						{ "key": "size", "value": "20" }
+					]
+				}
+			}
 		}
 	]
 }
