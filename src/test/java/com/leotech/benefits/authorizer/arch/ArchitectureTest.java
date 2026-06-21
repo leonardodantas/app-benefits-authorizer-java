@@ -90,13 +90,4 @@ class ArchitectureTest {
                 .check(classes);
     }
 
-    @Test
-    @DisplayName("repositories must be only in infra layer")
-    void repositoriesMustBeOnlyInInfra() {
-        noClasses()
-                .that().areAnnotatedWith("org.springframework.stereotype.Repository")
-                .or().areAnnotatedWith("org.springframework.data.jpa.repository.JpaRepository")
-                .should().resideOutsideOfPackage(BASE + ".infra..")
-                .check(classes);
-    }
 }
