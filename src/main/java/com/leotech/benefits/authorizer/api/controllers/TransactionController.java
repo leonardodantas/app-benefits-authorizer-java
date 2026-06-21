@@ -2,7 +2,9 @@ package com.leotech.benefits.authorizer.api.controllers;
 
 import com.leotech.benefits.authorizer.api.mappers.TransactionMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
+import com.leotech.benefits.authorizer.api.responses.TransactionLogResponse;
 import com.leotech.benefits.authorizer.app.usecases.CreateTransactionUseCase;
+import com.leotech.benefits.authorizer.app.usecases.GetTransactionHistoryUseCase;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,10 +13,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransactionController {
 
     private final CreateTransactionUseCase createTransactionUseCase;
+    private final GetTransactionHistoryUseCase getTransactionHistoryUseCase;
     private final TransactionMapper transactionMapper;
 
     @PostMapping
@@ -41,5 +48,16 @@ public class TransactionController {
 
         createTransactionUseCase.execute(transaction);
         log.info("Transaction for card {} completed", request.cardNumber());
+    }
+
+    @GetMapping("/{numeroCartao}")
+    @Operation(summary = "Obter histórico de transações", description = "Retorna o histórico paginado de transações de um cartão")
+    public Page<TransactionLogResponse> getHistory(
+            @PathVariable("numeroCartao") final String cardNumber,
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "20") final int size) {
+        log.info("Getting transaction history for card {}, page={}, size={}", cardNumber, page, size);
+        return getTransactionHistoryUseCase.execute(cardNumber, page, size)
+                .map(transactionMapper::toResponse);
     }
 }
