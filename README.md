@@ -122,11 +122,54 @@ docker compose up -d
 ### Executar Testes
 
 ```bash
-# Testes unitários e de integração
+# Todos os testes
 ./mvnw verify
 ```
 
 O relatório de cobertura estará em `target/site/jacoco/index.html`.
+
+## Testes
+
+O projeto possui **14 arquivos de teste** distribuídos em três categorias:
+
+### Unitários (12)
+
+Testam classes isoladamente com mocks, sem infraestrutura externa.
+
+| Teste | O que valida |
+|---|---|
+| `CardControllerTest` | Endpoints de criar e consultar cartão |
+| `TransactionControllerTest` | Endpoint de transação |
+| `ApiExceptionHandlerTest` | Handlers de fallback (CustomException e RuntimeException) |
+| `CreateCardUseCaseImplTest` | Criação de cartão (sucesso e duplicado) |
+| `CreateTransactionUseCaseImplTest` | Execução de transação via executor |
+| `GetBalanceUseCaseImplTest` | Consulta de saldo (existe e não existe) |
+| `TransactionExecutorTest` | Sucesso, stop com exception e stop sem exception |
+| `TransactionHandlerTest` | Propagação da chain e captura de exceções |
+| `CardExistenceHandlerTest` | Validação de existência do cartão |
+| `PasswordValidationHandlerTest` | Validação de senha |
+| `BalanceValidationHandlerTest` | Validação de saldo |
+| `DebitHandlerTest` | Débito e persistência do cartão |
+
+### Integração (1)
+
+Testa o fluxo completo com MySQL real via Testcontainers.
+
+| Teste | O que valida |
+|---|---|
+| `BenefitsAuthorizerIntegrationTest` | Criação de cartão, consulta de saldo, transações (sucesso e erros), concorrência |
+
+### Arquitetura (1)
+
+Garante que as regras de dependência entre camadas sejam respeitadas.
+
+| Teste | O que valida |
+|---|---|
+| `ArchitectureTest` | Domain não depende de ninguém; api não depende de infra; app não depende de api ou infra; infra não depende de api ou config |
+
+### Cobertura
+
+JaCoCo configurado com 100% de cobertura obrigatória para código produtivo (excluindo mappers, DTOs, config e domínio).
 
 ## CI
 
