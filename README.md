@@ -117,6 +117,12 @@ Um cartão bloqueado rejeita qualquer transação com `422 CARTAO_BLOQUEADO`.
 - `400` — Dados inválidos (status ausente ou inválido)
 - `404` — Cartão não encontrado
 
+### Consultar histórico de transações (`GET /cartoes/{numeroCartao}/transacoes?page=0&size=20`)
+
+Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora. Aceita filtro opcional por `?status=SUCCESS|ERROR`.
+
+- `200` — Histórico retornado com sucesso
+
 ## Idempotência
 
 | Endpoint | Idempotente | Comportamento |
@@ -128,16 +134,9 @@ Um cartão bloqueado rejeita qualquer transação com `422 CARTAO_BLOQUEADO`.
 
 A idempotência do `PATCH` é implementada no use case: antes de persistir, o status atual é comparado com o solicitado. Se iguais, o método retorna sem chamar o repositório, evitando escritas desnecessárias e locks desnecessários.
 
-### Concorrência
-
+## Concorrência
 
 Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
-
-### Consultar histórico de transações (`GET /cartoes/{numeroCartao}/transacoes?page=0&size=20`)
-
-Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora. Aceita filtro opcional por `?status=SUCCESS|ERROR`.
-
-- `200` — Histórico retornado com sucesso
 
 ## Como Executar
 
