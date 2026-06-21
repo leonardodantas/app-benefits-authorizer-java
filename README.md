@@ -1,5 +1,9 @@
 # Benefits Authorizer
 
+![CI](https://github.com/leonardodantas/app-benefits-authorizer-java/workflows/CI/badge.svg)
+![Java](https://img.shields.io/badge/Java-21-blue)
+![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
+
 Microsserviço de autorização de transações para cartões de benefícios. Responsável por criar cartões, consultar saldos e processar transações com validação de senha e saldo, suportando concorrência com lock pessimista.
 
 ## Tecnologias
@@ -115,8 +119,18 @@ Retorna o histórico paginado de transações de um cartão, ordenado da mais re
 
 ### Pré-requisitos
 
-- Java 21
-- Docker (para MySQL)
+- **Java 21** (Corretto, OpenJDK ou GraalVM)
+- **Docker** (para executar o MySQL localmente via docker-compose)
+- **Maven Wrapper** (`./mvnw`) já incluso no projeto
+
+### Variáveis de ambiente
+
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/miniautorizador` | URL do MySQL |
+| `SPRING_DATASOURCE_USERNAME` | `root` | Usuário do MySQL |
+| `SPRING_DATASOURCE_PASSWORD` | `root` | Senha do MySQL |
+| `APP_INITIAL_BALANCE` | `500` | Saldo inicial ao criar cartão |
 
 ### Passos
 
