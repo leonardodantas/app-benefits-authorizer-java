@@ -4,7 +4,6 @@ import com.leotech.benefits.authorizer.api.handlers.ApiExceptionHandler;
 import com.leotech.benefits.authorizer.api.mappers.CardMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
-import com.leotech.benefits.authorizer.app.usecases.AddBalanceUseCase;
 import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
@@ -40,9 +39,6 @@ class CardControllerTest {
 
     @MockitoBean
     private GetBalanceUseCase getBalanceUseCase;
-
-    @MockitoBean
-    private AddBalanceUseCase addBalanceUseCase;
 
     @MockitoBean
     private CardMapper cardMapper;
