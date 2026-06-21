@@ -108,13 +108,13 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return 201 when card is created")
         void shouldReturn201() throws Exception {
-            final CreateCardRequest request = new CreateCardRequest("1111111111111111", "1234");
+            final CreateCardRequest request = new CreateCardRequest("1111111111111113", "1234");
             final PostResult result = postRaw("/cartoes", request);
 
             assertThat(result.status()).isEqualTo(201);
 
             final CreateCardResponse response = objectMapper.readValue(result.body(), CreateCardResponse.class);
-            assertThat(response.cardNumber()).isEqualTo("1111111111111111");
+            assertThat(response.cardNumber()).isEqualTo("1111111111111113");
         }
 
         @Test
