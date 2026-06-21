@@ -259,11 +259,13 @@ class BenefitsAuthorizerIntegrationTest {
         }
 
         @Test
-        @DisplayName("should return 200 with paginated history")
+        @DisplayName("should return 200 with paginated history and success status")
         void shouldReturn200() {
             final var result = getRaw("/transacoes/" + CARD_NUMBER + "?page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("\"status\":\"SUCCESS\"");
+            assertThat(result.body()).contains("\"mensagem\":\"TRANSACAO_APROVADA\"");
             assertThat(result.body()).contains("numeroCartao");
             assertThat(result.body()).contains("saldoAnterior");
             assertThat(result.body()).contains("novoSaldo");
@@ -278,6 +280,31 @@ class BenefitsAuthorizerIntegrationTest {
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"content\":[]");
+        }
+    }
+
+    @Nested
+    @DisplayName("Error transactions")
+    class ErrorTransaction {
+
+        private static final String CARD_NUMBER = "9999999999999999";
+
+        @BeforeEach
+        void createCardAndFailedTransaction() {
+            postRaw("/cartoes", new CreateCardRequest(CARD_NUMBER, "1234"));
+            postRaw("/transacoes", new CreateTransactionRequest(CARD_NUMBER, "wrong", new BigDecimal("10.00")));
+        }
+
+        @Test
+        @DisplayName("should persist error event in history")
+        void shouldPersistErrorEvent() {
+            final var result = getRaw("/transacoes/" + CARD_NUMBER + "?page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("\"status\":\"ERROR\"");
+            assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
+            assertThat(result.body()).contains("\"saldoAnterior\":null");
+            assertThat(result.body()).contains("\"novoSaldo\":null");
         }
     }
 
