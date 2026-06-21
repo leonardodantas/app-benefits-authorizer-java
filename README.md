@@ -259,7 +259,7 @@ Recursos idempotentes garantem que múltiplas chamadas idênticas produzam o mes
 
 ## Desenvolvimento com IA
 
-Este projeto foi desenvolvido com auxílio de [DeepSeek](https://deepseek.com) (via opencode) como ferramenta de execução. A IA atuou como um desenvolvedor júnior — recebendo instruções diretas, implementando alterações sob orientação e tendo cada decisão validada antes de ser efetivada. O `AGENTS.md` definiu as regras de arquitetura, estilo e boas práticas que nortearam todas as interações. O planejamento, as escolhas arquiteturais e a validação final permaneceram sob responsabilidade humana.
+Este projeto foi desenvolvido com auxílio de [DeepSeek](https://deepseek.com) (via opencode) como ferramenta de execução. A IA atuou recebendo instruções diretas, implementando alterações sob orientação e tendo cada decisão validada antes de ser efetivada. O `AGENTS.md` definiu as regras de arquitetura, estilo e boas práticas que nortearam todas as interações. O planejamento, as escolhas arquiteturais e a validação final permaneceram sob responsabilidade humana.
 
 ## Commits
 
