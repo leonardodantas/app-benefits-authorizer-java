@@ -265,7 +265,7 @@ class BenefitsAuthorizerIntegrationTest {
     }
 
     @Nested
-    @DisplayName("GET /transacoes/{numeroCartao}")
+    @DisplayName("GET /cartoes/{numeroCartao}/transacoes")
     class GetTransactionHistory {
 
         private static final String CARD_NUMBER = "7777777777777777";
@@ -279,7 +279,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return 200 with paginated history and success status")
         void shouldReturn200() {
-            final RecordGetResult result = getRaw("/transacoes/" + CARD_NUMBER + "?page=0&size=20");
+            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"status\":\"SUCCESS\"");
@@ -294,7 +294,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return 200 with empty content when card has no transactions")
         void shouldReturn200Empty() {
-            final RecordGetResult result = getRaw("/transacoes/8888888888888888" + "?page=0&size=20");
+            final RecordGetResult result = getRaw("/cartoes/8888888888888888" + "/transacoes?page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"content\":[]");
@@ -316,7 +316,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should persist error event in history")
         void shouldPersistErrorEvent() {
-            final RecordGetResult result = getRaw("/transacoes/" + CARD_NUMBER + "?page=0&size=20");
+            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"status\":\"ERROR\"");
@@ -328,7 +328,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should filter by ERROR status")
         void shouldFilterByErrorStatus() {
-            final RecordGetResult result = getRaw("/transacoes/" + CARD_NUMBER + "?status=ERROR&page=0&size=20");
+            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?status=ERROR&page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"status\":\"ERROR\"");
@@ -338,7 +338,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return empty when filtering by SUCCESS but only has errors")
         void shouldReturnEmptyWhenFilteringBySuccess() {
-            final RecordGetResult result = getRaw("/transacoes/" + CARD_NUMBER + "?status=SUCCESS&page=0&size=20");
+            final RecordGetResult result = getRaw("/cartoes/" + CARD_NUMBER + "/transacoes?status=SUCCESS&page=0&size=20");
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"content\":[]");
