@@ -69,8 +69,9 @@ Resposta
 | `POST` | `/cartoes` | Criar cartão |
 | `GET` | `/cartoes` | Listar cartões (paginado) |
 | `GET` | `/cartoes/{numeroCartao}` | Consultar saldo |
+| `PATCH` | `/cartoes/{numeroCartao}` | Atualizar status do cartão (ATIVO/BLOQUEADO) |
+| `GET` | `/cartoes/{numeroCartao}/transacoes` | Histórico paginado de transações do cartão |
 | `POST` | `/transacoes` | Processar transação |
-| `GET` | `/transacoes/{numeroCartao}` | Histórico paginado de transações |
 
 ## Funcionalidades
 
@@ -95,24 +96,35 @@ Processa uma transação utilizando o padrão **Chain of Responsibility**, onde 
 
 Isolamento de responsabilidades:
 1. **CardExistenceHandler** — verifica se o cartão existe (com lock pessimista)
-2. **PasswordValidationHandler** — valida a senha
-3. **BalanceValidationHandler** — valida se há saldo suficiente
-4. **DebitHandler** — debita o valor e persiste o cartão atualizado
+2. **CardBlockedHandler** — verifica se o cartão não está bloqueado
+3. **PasswordValidationHandler** — valida a senha
+4. **BalanceValidationHandler** — valida se há saldo suficiente
+5. **DebitHandler** — debita o valor e persiste o cartão atualizado
 
 Cada handler define `CONTINUE`, `STOP` ou `SUCCESS` no contexto. Se `STOP`, a exception armazenada é relançada pelo `TransactionExecutor` e tratada centralizadamente pelo `ApiExceptionHandler`, eliminando `throw`s espalhados pela chain e mantendo o fluxo previsível e testável.
 
 - `201` — Transação aprovada
 - `400` — Dados inválidos
-- `422` — Cartão inexistente / Senha inválida / Saldo insuficiente
+- `422` — Cartão inexistente / Senha inválida / Saldo insuficiente / Cartão bloqueado
+
+### Atualizar status do cartão (`PATCH /cartoes/{numeroCartao}`)
+
+Atualiza o status do cartão entre `ACTIVE` e `BLOCKED`. Idempotente — se o cartão já estiver no status solicitado, nenhuma alteração é feita.
+
+Um cartão bloqueado rejeita qualquer transação com `422 CARTAO_BLOQUEADO`.
+
+- `204` — Status atualizado com sucesso
+- `400` — Dados inválidos (status ausente ou inválido)
+- `404` — Cartão não encontrado
 
 ### Concorrência
 
 
 Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
 
-### Consultar histórico de transações (`GET /transacoes/{numeroCartao}?page=0&size=20`)
+### Consultar histórico de transações (`GET /cartoes/{numeroCartao}/transacoes?page=0&size=20`)
 
-Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora.
+Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora. Aceita filtro opcional por `?status=SUCCESS|ERROR`.
 
 - `200` — Histórico retornado com sucesso
 
@@ -160,26 +172,28 @@ O relatório de cobertura estará em `target/site/jacoco/index.html`.
 
 ## Testes
 
-O projeto possui **17 arquivos de teste** distribuídos em três categorias:
+O projeto possui **19 arquivos de teste** distribuídos em três categorias:
 
-### Unitários (15)
+### Unitários (17)
 
 Testam classes isoladamente com mocks, sem infraestrutura externa.
 
 | Teste | O que valida |
 |---|---|
-| `CardControllerTest` | Endpoints de criar e consultar cartão |
-| `TransactionControllerTest` | Endpoint de transação e histórico |
+| `CardControllerTest` | Endpoints de criar, consultar, listar, atualizar status e histórico de transações do cartão |
+| `TransactionControllerTest` | Endpoint de transação |
 | `ApiExceptionHandlerTest` | Handlers de fallback (CustomException e RuntimeException) |
 | `CreateCardUseCaseImplTest` | Criação de cartão (sucesso e duplicado) |
 | `CreateTransactionUseCaseImplTest` | Execução de transação via executor |
 | `GetBalanceUseCaseImplTest` | Consulta de saldo (existe e não existe) |
 | `GetTransactionHistoryUseCaseImplTest` | Histórico paginado de transações |
+| `UpdateCardStatusUseCaseImplTest` | Atualização de status do cartão (bloqueio, desbloqueio, idempotência) |
 | `TransactionExecutorTest` | Sucesso, stop com exception e stop sem exception |
 | `TransactionHandlerTest` | Propagação da chain e captura de exceções |
 | `TransactionEventListenerTest` | Delegacão de evento para consumer |
 | `EventPublisherHandlerTest` | Publicação de evento após débito |
 | `CardExistenceHandlerTest` | Validação de existência do cartão |
+| `CardBlockedHandlerTest` | Validação de cartão bloqueado |
 | `PasswordValidationHandlerTest` | Validação de senha |
 | `BalanceValidationHandlerTest` | Validação de saldo |
 | `DebitHandlerTest` | Débito e persistência do cartão |
@@ -190,7 +204,7 @@ Testa o fluxo completo com MySQL real via Testcontainers.
 
 | Teste | O que valida |
 |---|---|
-| `BenefitsAuthorizerIntegrationTest` | Criação de cartão, consulta de saldo, transações (sucesso e erros), concorrência |
+| `BenefitsAuthorizerIntegrationTest` | Criação de cartão, consulta de saldo, transações (sucesso e erros), bloqueio de cartão, concorrência |
 
 ### Arquitetura (1)
 
