@@ -16,7 +16,7 @@ class ArchitectureTest {
         noClasses()
                 .that().resideInAPackage("..domain..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..app..", "..infra..", "..config..")
+                .resideInAnyPackage(BASE + ".api..", BASE + ".app..", BASE + ".infra..", BASE + ".config")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -24,9 +24,9 @@ class ArchitectureTest {
     @DisplayName("api must not depend directly on infra")
     void apiMustNotDependOnInfra() {
         noClasses()
-                .that().resideInAPackage("..api..")
+                .that().resideInAPackage(BASE + ".api..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..infra..")
+                .resideInAnyPackage(BASE + ".infra..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -34,9 +34,9 @@ class ArchitectureTest {
     @DisplayName("app must not depend on api or infra")
     void appMustNotDependOnApiOrInfra() {
         noClasses()
-                .that().resideInAPackage("..app..")
+                .that().resideInAPackage(BASE + ".app..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..infra..")
+                .resideInAnyPackage(BASE + ".api..", BASE + ".infra..")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 
@@ -44,9 +44,9 @@ class ArchitectureTest {
     @DisplayName("infra must not depend on api or config")
     void infraMustNotDependOnApiOrConfig() {
         noClasses()
-                .that().resideInAPackage("..infra..")
+                .that().resideInAPackage(BASE + ".infra..")
                 .should().dependOnClassesThat()
-                .resideInAnyPackage("..api..", "..config..")
+                .resideInAnyPackage(BASE + ".api..", BASE + ".config")
                 .check(new ClassFileImporter().importPackages(BASE));
     }
 }
