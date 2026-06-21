@@ -62,8 +62,8 @@ class TransactionControllerTest {
         @Test
         @DisplayName("should return 201 with OK when transaction succeeds")
         void shouldReturn201() throws Exception {
-            final var request = new CreateTransactionRequest(CARD_NUMBER, PASSWORD, AMOUNT);
-            final var domain = new Transaction(CARD_NUMBER, PASSWORD, AMOUNT);
+            final CreateTransactionRequest request = new CreateTransactionRequest(CARD_NUMBER, PASSWORD, AMOUNT);
+            final Transaction domain = new Transaction(CARD_NUMBER, PASSWORD, AMOUNT);
 
             when(transactionMapper.toDomain(request)).thenReturn(domain);
 
@@ -82,8 +82,8 @@ class TransactionControllerTest {
         @Test
         @DisplayName("should return 422 with CARTAO_INEXISTENTE when card does not exist")
         void shouldReturn422CardNotExists() throws Exception {
-            final var request = new CreateTransactionRequest("9999999999999999", PASSWORD, AMOUNT);
-            final var domain = new Transaction("9999999999999999", PASSWORD, AMOUNT);
+            final CreateTransactionRequest request = new CreateTransactionRequest("9999999999999999", PASSWORD, AMOUNT);
+            final Transaction domain = new Transaction("9999999999999999", PASSWORD, AMOUNT);
 
             when(transactionMapper.toDomain(request)).thenReturn(domain);
             doThrow(new CardNotExistsException())
@@ -101,8 +101,8 @@ class TransactionControllerTest {
         @Test
         @DisplayName("should return 422 with SENHA_INVALIDA when password is wrong")
         void shouldReturn422InvalidPassword() throws Exception {
-            final var request = new CreateTransactionRequest(CARD_NUMBER, "wrong", AMOUNT);
-            final var domain = new Transaction(CARD_NUMBER, "wrong", AMOUNT);
+            final CreateTransactionRequest request = new CreateTransactionRequest(CARD_NUMBER, "wrong", AMOUNT);
+            final Transaction domain = new Transaction(CARD_NUMBER, "wrong", AMOUNT);
 
             when(transactionMapper.toDomain(request)).thenReturn(domain);
             doThrow(new InvalidPasswordException())
@@ -120,8 +120,8 @@ class TransactionControllerTest {
         @Test
         @DisplayName("should return 422 with SALDO_INSUFICIENTE when balance is insufficient")
         void shouldReturn422InsufficientBalance() throws Exception {
-            final var request = new CreateTransactionRequest(CARD_NUMBER, PASSWORD, new BigDecimal("99999"));
-            final var domain = new Transaction(CARD_NUMBER, PASSWORD, new BigDecimal("99999"));
+            final CreateTransactionRequest request = new CreateTransactionRequest(CARD_NUMBER, PASSWORD, new BigDecimal("99999"));
+            final Transaction domain = new Transaction(CARD_NUMBER, PASSWORD, new BigDecimal("99999"));
 
             when(transactionMapper.toDomain(request)).thenReturn(domain);
             doThrow(new InsufficientBalanceException())

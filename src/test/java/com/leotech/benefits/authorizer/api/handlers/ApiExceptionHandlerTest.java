@@ -15,7 +15,7 @@ class ApiExceptionHandlerTest {
     @Test
     @DisplayName("should return 422 for generic CustomException")
     void shouldHandleCustomException() {
-        final var exception = new CustomException("CUSTOM_ERROR") {
+        final CustomException exception = new CustomException("CUSTOM_ERROR") {
         };
 
         final ResponseEntity<String> response = handler.handleCustomException(exception);
@@ -27,7 +27,7 @@ class ApiExceptionHandlerTest {
     @Test
     @DisplayName("should return 500 for generic RuntimeException")
     void shouldHandleRuntimeException() {
-        final var exception = new RuntimeException("unexpected");
+        final RuntimeException exception = new RuntimeException("unexpected");
 
         final ResponseEntity<ErrorResponse> response = handler.handleRuntime(exception);
 
