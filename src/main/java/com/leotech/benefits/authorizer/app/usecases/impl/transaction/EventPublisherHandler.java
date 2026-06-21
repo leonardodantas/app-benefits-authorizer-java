@@ -1,7 +1,5 @@
 package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 
-package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
-
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
