@@ -6,6 +6,7 @@ import com.leotech.benefits.authorizer.api.responses.TransactionLogResponse;
 import com.leotech.benefits.authorizer.app.usecases.CreateTransactionUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetTransactionHistoryUseCase;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,13 +52,14 @@ public class TransactionController {
     }
 
     @GetMapping("/{numeroCartao}")
-    @Operation(summary = "Obter histórico de transações", description = "Retorna o histórico paginado de transações de um cartão")
+    @Operation(summary = "Obter histórico de transações", description = "Retorna o histórico paginado de transações de um cartão, com filtro opcional por status")
     public Page<TransactionLogResponse> getHistory(
             @PathVariable("numeroCartao") final String cardNumber,
+            @RequestParam(required = false) final TransactionStatus status,
             @RequestParam(defaultValue = "0") final int page,
             @RequestParam(defaultValue = "20") final int size) {
-        log.info("Getting transaction history for card {}, page={}, size={}", cardNumber, page, size);
-        return getTransactionHistoryUseCase.execute(cardNumber, page, size)
+        log.info("Getting transaction history for card {}, status={}, page={}, size={}", cardNumber, status, page, size);
+        return getTransactionHistoryUseCase.execute(cardNumber, status, page, size)
                 .map(transactionMapper::toResponse);
     }
 }
