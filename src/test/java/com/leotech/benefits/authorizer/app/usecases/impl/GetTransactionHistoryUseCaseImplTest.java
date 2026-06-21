@@ -2,6 +2,7 @@ package com.leotech.benefits.authorizer.app.usecases.impl;
 
 import com.leotech.benefits.authorizer.app.repositories.TransactionLogRepository;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,16 +30,17 @@ class GetTransactionHistoryUseCaseImplTest {
     private GetTransactionHistoryUseCaseImpl useCase;
 
     @Test
-    @DisplayName("should return paginated history")
+    @DisplayName("should return paginated history without status filter")
     void shouldReturnPaginatedHistory() {
         final TransactionEvent event = new TransactionEvent(
-                "123", BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, LocalDateTime.now());
+                "123", BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, LocalDateTime.now(),
+                TransactionStatus.SUCCESS, "ok");
         final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
 
         when(transactionLogRepository.findByCardNumber("123", PageRequest.of(0, 20)))
                 .thenReturn(page);
 
-        final Page<TransactionEvent> result = useCase.execute("123", 0, 20);
+        final Page<TransactionEvent> result = useCase.execute("123", null, 0, 20);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().cardNumber()).isEqualTo("123");
@@ -54,11 +56,30 @@ class GetTransactionHistoryUseCaseImplTest {
         when(transactionLogRepository.findByCardNumber("123", PageRequest.of(0, 20)))
                 .thenReturn(emptyPage);
 
-        final Page<TransactionEvent> result = useCase.execute("123", 0, 20);
+        final Page<TransactionEvent> result = useCase.execute("123", null, 0, 20);
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
         verify(transactionLogRepository).findByCardNumber("123", PageRequest.of(0, 20));
+        verifyNoMoreInteractions(transactionLogRepository);
+    }
+
+    @Test
+    @DisplayName("should filter by status")
+    void shouldFilterByStatus() {
+        final TransactionEvent event = new TransactionEvent(
+                "123", BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, LocalDateTime.now(),
+                TransactionStatus.ERROR, "erro");
+        final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
+
+        when(transactionLogRepository.findByCardNumber("123", TransactionStatus.ERROR, PageRequest.of(0, 20)))
+                .thenReturn(page);
+
+        final Page<TransactionEvent> result = useCase.execute("123", TransactionStatus.ERROR, 0, 20);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().status()).isEqualTo(TransactionStatus.ERROR);
+        verify(transactionLogRepository).findByCardNumber("123", TransactionStatus.ERROR, PageRequest.of(0, 20));
         verifyNoMoreInteractions(transactionLogRepository);
     }
 }

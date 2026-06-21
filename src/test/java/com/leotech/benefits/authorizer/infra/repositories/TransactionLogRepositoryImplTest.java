@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.infra.repositories;
 
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import com.leotech.benefits.authorizer.infra.entities.TransactionLogEntity;
 import com.leotech.benefits.authorizer.infra.mappers.TransactionLogInfraMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,8 @@ class TransactionLogRepositoryImplTest {
     void shouldFindByCardNumber() {
         final TransactionLogEntity entity = TransactionLogEntity.builder()
                 .cardNumber("1234567890123456")
+                .status(TransactionStatus.SUCCESS)
+                .message("ok")
                 .previousBalance(new BigDecimal("100.00"))
                 .newBalance(new BigDecimal("70.00"))
                 .amount(new BigDecimal("30.00"))
@@ -44,7 +47,7 @@ class TransactionLogRepositoryImplTest {
                 .build();
         final TransactionEvent event = new TransactionEvent(
                 "1234567890123456", new BigDecimal("100.00"), new BigDecimal("70.00"),
-                new BigDecimal("30.00"), LocalDateTime.now());
+                new BigDecimal("30.00"), LocalDateTime.now(), TransactionStatus.SUCCESS, "ok");
         final Page<TransactionLogEntity> entityPage = new PageImpl<>(List.of(entity));
         final PageRequest pageRequest = PageRequest.of(0, 20);
 
@@ -75,5 +78,35 @@ class TransactionLogRepositoryImplTest {
         assertThat(result.getContent()).isEmpty();
         verify(jpaTransactionLogRepository).findByCardNumberOrderByTimestampDesc("1234567890123456", pageRequest);
         verifyNoInteractions(transactionLogInfraMapper);
+    }
+
+    @Test
+    @DisplayName("should find by card number and status and map to domain")
+    void shouldFindByCardNumberAndStatus() {
+        final TransactionLogEntity entity = TransactionLogEntity.builder()
+                .cardNumber("1234567890123456")
+                .status(TransactionStatus.ERROR)
+                .message("erro")
+                .build();
+        final TransactionEvent event = new TransactionEvent(
+                "1234567890123456", null, null, null, LocalDateTime.now(),
+                TransactionStatus.ERROR, "erro");
+        final Page<TransactionLogEntity> entityPage = new PageImpl<>(List.of(entity));
+        final PageRequest pageRequest = PageRequest.of(0, 20);
+
+        when(jpaTransactionLogRepository.findByCardNumberAndStatusOrderByTimestampDesc(
+                "1234567890123456", TransactionStatus.ERROR, pageRequest))
+                .thenReturn(entityPage);
+        when(transactionLogInfraMapper.toDomain(entity)).thenReturn(event);
+
+        final Page<TransactionEvent> result = repository.findByCardNumber(
+                "1234567890123456", TransactionStatus.ERROR, pageRequest);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().status()).isEqualTo(TransactionStatus.ERROR);
+        verify(jpaTransactionLogRepository).findByCardNumberAndStatusOrderByTimestampDesc(
+                "1234567890123456", TransactionStatus.ERROR, pageRequest);
+        verify(transactionLogInfraMapper).toDomain(entity);
+        verifyNoMoreInteractions(jpaTransactionLogRepository, transactionLogInfraMapper);
     }
 }

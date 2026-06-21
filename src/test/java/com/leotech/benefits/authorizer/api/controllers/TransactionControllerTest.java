@@ -183,7 +183,7 @@ class TransactionControllerTest {
                     "TRANSACAO_APROVADA", new BigDecimal("100.00"), new BigDecimal("70.00"),
                     new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
 
-            when(getTransactionHistoryUseCase.execute(CARD_NUMBER, 0, 20)).thenReturn(page);
+            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20))).thenReturn(page);
             when(transactionMapper.toResponse(event)).thenReturn(response);
 
             mockMvc.perform(get("/transacoes/{numeroCartao}", CARD_NUMBER))
@@ -191,7 +191,7 @@ class TransactionControllerTest {
                     .andExpect(jsonPath("$.content[0].numeroCartao").value(CARD_NUMBER))
                     .andExpect(jsonPath("$.content[0].valor").value(30.00));
 
-            verify(getTransactionHistoryUseCase).execute(CARD_NUMBER, 0, 20);
+            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20));
             verify(transactionMapper).toResponse(event);
         }
 
@@ -200,15 +200,40 @@ class TransactionControllerTest {
         void shouldReturn200Empty() throws Exception {
             final Page<TransactionEvent> emptyPage = Page.empty();
 
-            when(getTransactionHistoryUseCase.execute(CARD_NUMBER, 0, 20)).thenReturn(emptyPage);
+            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20))).thenReturn(emptyPage);
 
             mockMvc.perform(get("/transacoes/{numeroCartao}", CARD_NUMBER))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isEmpty())
                     .andExpect(jsonPath("$.totalElements").value(0));
 
-            verify(getTransactionHistoryUseCase).execute(CARD_NUMBER, 0, 20);
+            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20));
             verifyNoInteractions(transactionMapper);
+        }
+
+        @Test
+        @DisplayName("should return 200 filtered by status")
+        void shouldReturn200FilteredByStatus() throws Exception {
+            final TransactionEvent event = TransactionEvent.success(
+                    CARD_NUMBER, new BigDecimal("100.00"), new BigDecimal("70.00"), new BigDecimal("30.00"));
+            final Page<TransactionEvent> page = new PageImpl<>(List.of(event));
+            final TransactionLogResponse response = new TransactionLogResponse(
+                    CARD_NUMBER, TransactionStatus.SUCCESS,
+                    "TRANSACAO_APROVADA", new BigDecimal("100.00"), new BigDecimal("70.00"),
+                    new BigDecimal("30.00"), LocalDateTime.of(2026, 6, 20, 10, 0));
+
+            when(getTransactionHistoryUseCase.execute(eq(CARD_NUMBER), eq(TransactionStatus.SUCCESS), eq(0), eq(20)))
+                    .thenReturn(page);
+            when(transactionMapper.toResponse(event)).thenReturn(response);
+
+            mockMvc.perform(get("/transacoes/{numeroCartao}", CARD_NUMBER)
+                            .param("status", "SUCCESS"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content[0].numeroCartao").value(CARD_NUMBER))
+                    .andExpect(jsonPath("$.content[0].status").value("SUCCESS"));
+
+            verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), eq(TransactionStatus.SUCCESS), eq(0), eq(20));
+            verify(transactionMapper).toResponse(event);
         }
     }
 }

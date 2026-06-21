@@ -306,6 +306,25 @@ class BenefitsAuthorizerIntegrationTest {
             assertThat(result.body()).contains("\"saldoAnterior\":null");
             assertThat(result.body()).contains("\"novoSaldo\":null");
         }
+
+        @Test
+        @DisplayName("should filter by ERROR status")
+        void shouldFilterByErrorStatus() {
+            final var result = getRaw("/transacoes/" + CARD_NUMBER + "?status=ERROR&page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("\"status\":\"ERROR\"");
+            assertThat(result.body()).contains("\"mensagem\":\"SENHA_INVALIDA\"");
+        }
+
+        @Test
+        @DisplayName("should return empty when filtering by SUCCESS but only has errors")
+        void shouldReturnEmptyWhenFilteringBySuccess() {
+            final var result = getRaw("/transacoes/" + CARD_NUMBER + "?status=SUCCESS&page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("\"content\":[]");
+        }
     }
 
     @Nested
