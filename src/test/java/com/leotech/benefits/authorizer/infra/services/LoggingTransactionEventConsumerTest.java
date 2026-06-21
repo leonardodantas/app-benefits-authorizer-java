@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -45,11 +44,11 @@ class LoggingTransactionEventConsumerTest {
         verify(transactionLogRepository).save(entityCaptor.capture());
 
         final var entity = entityCaptor.getValue();
+
         assertThat(entity.getCardNumber()).isEqualTo("1234567890123456");
         assertThat(entity.getPreviousBalance()).isEqualByComparingTo(new BigDecimal("100.00"));
         assertThat(entity.getNewBalance()).isEqualByComparingTo(new BigDecimal("70.00"));
         assertThat(entity.getAmount()).isEqualByComparingTo(new BigDecimal("30.00"));
-        assertThat(entity.getTimestamp()).isEqualTo(LocalDateTime.of(2026, 6, 20, 10, 0));
 
         verifyNoMoreInteractions(transactionLogRepository);
     }

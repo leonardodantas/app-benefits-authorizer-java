@@ -13,4 +13,6 @@ import org.mapstruct.ReportingPolicy;
 public interface TransactionLogInfraMapper {
 
     TransactionEvent toDomain(TransactionLogEntity entity);
+
+    TransactionLogEntity toEntity(TransactionEvent event);
 }
