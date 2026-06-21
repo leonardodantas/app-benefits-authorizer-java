@@ -1,4 +1,4 @@
-package com.leotech.benefits.authorizer.app.config;
+package com.leotech.benefits.authorizer.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

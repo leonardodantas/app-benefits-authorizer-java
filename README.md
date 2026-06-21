@@ -93,6 +93,7 @@ Cada handler define `CONTINUE`, `STOP` ou `SUCCESS` no contexto. Se `STOP`, a ex
 
 ### Concorrência
 
+
 Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
 
 ## Como Executar
