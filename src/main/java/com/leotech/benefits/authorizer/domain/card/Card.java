@@ -9,6 +9,14 @@ public record Card(
         Long id,
         String cardNumber,
         String password,
-        BigDecimal balance
+        BigDecimal balance,
+        CardStatus status
 ) {
+    public Card block() {
+        return toBuilder().status(CardStatus.BLOCKED).build();
+    }
+
+    public Card unblock() {
+        return toBuilder().status(CardStatus.ACTIVE).build();
+    }
 }

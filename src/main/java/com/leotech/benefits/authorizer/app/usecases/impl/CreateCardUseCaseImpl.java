@@ -6,6 +6,7 @@ import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.config.AppProperties;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
+import com.leotech.benefits.authorizer.domain.card.CardStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
         final Card cardWithBalance = card.toBuilder()
                 .password(encryptedPassword)
                 .balance(balance)
+                .status(CardStatus.ACTIVE)
                 .build();
 
         final Card saved = cardRepository.save(cardWithBalance);

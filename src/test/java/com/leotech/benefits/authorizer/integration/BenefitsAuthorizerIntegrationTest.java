@@ -3,6 +3,7 @@ package com.leotech.benefits.authorizer.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
+import com.leotech.benefits.authorizer.api.requests.UpdateCardStatusRequest;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -90,6 +91,21 @@ class BenefitsAuthorizerIntegrationTest {
             final HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + path))
                     .GET()
+                    .build();
+            final HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            return new RecordGetResult(httpResponse.statusCode(), httpResponse.body());
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private RecordGetResult patchRaw(final String path, final Object request) {
+        try {
+            final String json = objectMapper.writeValueAsString(request);
+            final HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + path))
+                    .header("Content-Type", "application/json")
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(json))
                     .build();
             final HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             return new RecordGetResult(httpResponse.statusCode(), httpResponse.body());
@@ -342,6 +358,52 @@ class BenefitsAuthorizerIntegrationTest {
 
             assertThat(result.status()).isEqualTo(200);
             assertThat(result.body()).contains("\"content\":[]");
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /cartoes/{numeroCartao} / Block card")
+    class BlockCard {
+
+        private static final String BLOCK_CARD = "1010101010101010";
+
+        @BeforeEach
+        void createCard() {
+            postRaw("/cartoes", new CreateCardRequest(BLOCK_CARD, "1234"));
+        }
+
+        @Test
+        @DisplayName("should block card and reject transactions")
+        void shouldBlockAndRejectTransactions() {
+            final UpdateCardStatusRequest blockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.BLOCKED);
+
+            final RecordGetResult blockResult = patchRaw("/cartoes/" + BLOCK_CARD, blockRequest);
+            assertThat(blockResult.status()).isEqualTo(204);
+
+            final PostResult transactionResult = postRaw("/transacoes",
+                    new CreateTransactionRequest(BLOCK_CARD, "1234", new BigDecimal("10.00")));
+            assertThat(transactionResult.status()).isEqualTo(422);
+            assertThat(transactionResult.body()).isEqualTo("CARTAO_BLOQUEADO");
+        }
+
+        @Test
+        @DisplayName("should unblock card and allow transactions again")
+        void shouldUnblockAndAllowTransactions() {
+            final UpdateCardStatusRequest blockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.BLOCKED);
+
+            patchRaw("/cartoes/" + BLOCK_CARD, blockRequest);
+
+            final UpdateCardStatusRequest unblockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.ACTIVE);
+
+            final RecordGetResult unblockResult = patchRaw("/cartoes/" + BLOCK_CARD, unblockRequest);
+            assertThat(unblockResult.status()).isEqualTo(204);
+
+            final PostResult transactionResult = postRaw("/transacoes",
+                    new CreateTransactionRequest(BLOCK_CARD, "1234", new BigDecimal("10.00")));
+            assertThat(transactionResult.status()).isEqualTo(201);
         }
     }
 

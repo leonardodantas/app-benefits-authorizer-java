@@ -5,6 +5,7 @@ import com.leotech.benefits.authorizer.app.services.PasswordEncoder;
 import com.leotech.benefits.authorizer.config.AppProperties;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
+import com.leotech.benefits.authorizer.domain.card.CardStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -87,6 +88,7 @@ class CreateCardUseCaseImplTest {
                     .cardNumber(CARD_NUMBER)
                     .password(ENCRYPTED_PASSWORD)
                     .balance(INITIAL_BALANCE)
+                    .status(CardStatus.ACTIVE)
                     .build();
 
             when(cardRepository.findByCardNumber(CARD_NUMBER))
@@ -111,6 +113,7 @@ class CreateCardUseCaseImplTest {
             assertThat(captured.cardNumber()).isEqualTo(CARD_NUMBER);
             assertThat(captured.password()).isEqualTo(ENCRYPTED_PASSWORD);
             assertThat(captured.balance()).isEqualByComparingTo(INITIAL_BALANCE);
+            assertThat(captured.status()).isEqualTo(CardStatus.ACTIVE);
 
             verifyNoMoreInteractions(cardRepository, passwordEncoder, appProperties);
         }

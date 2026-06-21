@@ -11,9 +11,11 @@ import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetTransactionHistoryUseCase;
 import com.leotech.benefits.authorizer.app.usecases.ListCardsUseCase;
+import com.leotech.benefits.authorizer.app.usecases.UpdateCardStatusUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
 import com.leotech.benefits.authorizer.domain.card.CardNotFoundException;
+import com.leotech.benefits.authorizer.domain.card.CardStatus;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +38,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
 @WebMvcTest(CardController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -56,6 +59,9 @@ class CardControllerTest {
 
     @MockitoBean
     private GetTransactionHistoryUseCase getTransactionHistoryUseCase;
+
+    @MockitoBean
+    private UpdateCardStatusUseCase updateCardStatusUseCase;
 
     @MockitoBean
     private CardMapper cardMapper;
@@ -212,6 +218,66 @@ class CardControllerTest {
 
             verify(listCardsUseCase).execute(0, 20);
             verify(cardMapper).toSummaryResponse(card);
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /cartoes/{numeroCartao}")
+    class UpdateCardStatus {
+
+        @Test
+        @DisplayName("should return 204 when blocking card")
+        void shouldReturn204Block() throws Exception {
+            mockMvc.perform(patch("/cartoes/{numeroCartao}", CARD_NUMBER)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"status": "BLOCKED"}
+                                    """))
+                    .andExpect(status().isNoContent());
+
+            verify(updateCardStatusUseCase).execute(CARD_NUMBER, CardStatus.BLOCKED);
+            verifyNoMoreInteractions(updateCardStatusUseCase);
+        }
+
+        @Test
+        @DisplayName("should return 204 when unblocking card")
+        void shouldReturn204Unblock() throws Exception {
+            mockMvc.perform(patch("/cartoes/{numeroCartao}", CARD_NUMBER)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"status": "ACTIVE"}
+                                    """))
+                    .andExpect(status().isNoContent());
+
+            verify(updateCardStatusUseCase).execute(CARD_NUMBER, CardStatus.ACTIVE);
+            verifyNoMoreInteractions(updateCardStatusUseCase);
+        }
+
+        @Test
+        @DisplayName("should return 400 when status is null")
+        void shouldReturn400() throws Exception {
+            mockMvc.perform(patch("/cartoes/{numeroCartao}", CARD_NUMBER)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(updateCardStatusUseCase);
+        }
+
+        @Test
+        @DisplayName("should return 404 when card not found")
+        void shouldReturn404() throws Exception {
+            doThrow(new CardNotFoundException(CARD_NUMBER))
+                    .when(updateCardStatusUseCase).execute(CARD_NUMBER, CardStatus.BLOCKED);
+
+            mockMvc.perform(patch("/cartoes/{numeroCartao}", CARD_NUMBER)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"status": "BLOCKED"}
+                                    """))
+                    .andExpect(status().isNotFound());
+
+            verify(updateCardStatusUseCase).execute(CARD_NUMBER, CardStatus.BLOCKED);
         }
     }
 

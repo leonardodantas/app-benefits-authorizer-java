@@ -18,9 +18,11 @@ public class TransactionChainConfig {
         final TransactionHandler debit = new DebitHandler(cardRepository);
         final TransactionHandler balanceValidation = new BalanceValidationHandler();
         final TransactionHandler passwordValidation = new PasswordValidationHandler(passwordEncoder);
+        final TransactionHandler cardBlocked = new CardBlockedHandler();
         final TransactionHandler cardExistence = new CardExistenceHandler(cardRepository);
 
-        cardExistence.setNext(passwordValidation);
+        cardExistence.setNext(cardBlocked);
+        cardBlocked.setNext(passwordValidation);
         passwordValidation.setNext(balanceValidation);
         balanceValidation.setNext(debit);
 

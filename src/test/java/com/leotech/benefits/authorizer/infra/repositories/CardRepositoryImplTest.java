@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.infra.repositories;
 
 import com.leotech.benefits.authorizer.domain.card.Card;
+import com.leotech.benefits.authorizer.domain.card.CardStatus;
 import com.leotech.benefits.authorizer.infra.entities.CardEntity;
 import com.leotech.benefits.authorizer.infra.mappers.CardInfraMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,7 @@ class CardRepositoryImplTest {
                 .cardNumber("1234567890123456")
                 .password("encrypted")
                 .balance(new BigDecimal("100.00"))
+                .status(CardStatus.ACTIVE)
                 .build();
 
         when(jpaCardRepository.findByCardNumber("1234567890123456")).thenReturn(Optional.of(entity));
@@ -62,6 +64,7 @@ class CardRepositoryImplTest {
                 .cardNumber("1234567890123456")
                 .password("encrypted")
                 .balance(new BigDecimal("100.00"))
+                .status(CardStatus.ACTIVE)
                 .build();
 
         when(jpaCardRepository.findWithLockByCardNumber("1234567890123456")).thenReturn(Optional.of(entity));
@@ -82,12 +85,14 @@ class CardRepositoryImplTest {
                 .cardNumber("1234567890123456")
                 .password("1234")
                 .balance(BigDecimal.TEN)
+                .status(CardStatus.ACTIVE)
                 .build();
         final CardEntity savedEntity = CardEntity.builder()
                 .id(1L)
                 .cardNumber("1234567890123456")
                 .password("1234")
                 .balance(BigDecimal.TEN)
+                .status(CardStatus.ACTIVE)
                 .build();
 
         when(jpaCardRepository.save(any(CardEntity.class))).thenReturn(savedEntity);
@@ -106,6 +111,7 @@ class CardRepositoryImplTest {
                 .cardNumber("1234567890123456")
                 .password("encrypted")
                 .balance(new BigDecimal("100.00"))
+                .status(CardStatus.ACTIVE)
                 .build();
         final PageRequest pageRequest = PageRequest.of(0, 20);
         final Page<CardEntity> entityPage = new PageImpl<>(List.of(entity));
