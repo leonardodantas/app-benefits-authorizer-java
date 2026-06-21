@@ -96,6 +96,12 @@ Cada handler define `CONTINUE`, `STOP` ou `SUCCESS` no contexto. Se `STOP`, a ex
 
 Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
 
+### Consultar histórico de transações (`GET /transacoes/{numeroCartao}?page=0&size=20`)
+
+Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora.
+
+- `200` — Histórico retornado com sucesso
+
 ## Como Executar
 
 ### Pré-requisitos
@@ -130,22 +136,25 @@ O relatório de cobertura estará em `target/site/jacoco/index.html`.
 
 ## Testes
 
-O projeto possui **14 arquivos de teste** distribuídos em três categorias:
+O projeto possui **17 arquivos de teste** distribuídos em três categorias:
 
-### Unitários (12)
+### Unitários (15)
 
 Testam classes isoladamente com mocks, sem infraestrutura externa.
 
 | Teste | O que valida |
 |---|---|
 | `CardControllerTest` | Endpoints de criar e consultar cartão |
-| `TransactionControllerTest` | Endpoint de transação |
+| `TransactionControllerTest` | Endpoint de transação e histórico |
 | `ApiExceptionHandlerTest` | Handlers de fallback (CustomException e RuntimeException) |
 | `CreateCardUseCaseImplTest` | Criação de cartão (sucesso e duplicado) |
 | `CreateTransactionUseCaseImplTest` | Execução de transação via executor |
 | `GetBalanceUseCaseImplTest` | Consulta de saldo (existe e não existe) |
+| `GetTransactionHistoryUseCaseImplTest` | Histórico paginado de transações |
 | `TransactionExecutorTest` | Sucesso, stop com exception e stop sem exception |
 | `TransactionHandlerTest` | Propagação da chain e captura de exceções |
+| `TransactionEventListenerTest` | Delegacão de evento para consumer |
+| `EventPublisherHandlerTest` | Publicação de evento após débito |
 | `CardExistenceHandlerTest` | Validação de existência do cartão |
 | `PasswordValidationHandlerTest` | Validação de senha |
 | `BalanceValidationHandlerTest` | Validação de saldo |

@@ -247,6 +247,32 @@ class BenefitsAuthorizerIntegrationTest {
     }
 
     @Nested
+    @DisplayName("GET /transacoes/{numeroCartao}")
+    class GetTransactionHistory {
+
+        private static final String CARD_NUMBER = "7777777777777777";
+
+        @BeforeEach
+        void createCardAndTransaction() {
+            postRaw("/cartoes", new CreateCardRequest(CARD_NUMBER, "1234"));
+            postRaw("/transacoes", new CreateTransactionRequest(CARD_NUMBER, "1234", new BigDecimal("50.00")));
+        }
+
+        @Test
+        @DisplayName("should return 200 with paginated history")
+        void shouldReturn200() {
+            final var result = getRaw("/transacoes/" + CARD_NUMBER + "?page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("numeroCartao");
+            assertThat(result.body()).contains("saldoAnterior");
+            assertThat(result.body()).contains("novoSaldo");
+            assertThat(result.body()).contains("valor");
+            assertThat(result.body()).contains("dataHora");
+        }
+    }
+
+    @Nested
     @DisplayName("Concurrency")
     class Concurrency {
 
