@@ -117,6 +117,17 @@ Um cartão bloqueado rejeita qualquer transação com `422 CARTAO_BLOQUEADO`.
 - `400` — Dados inválidos (status ausente ou inválido)
 - `404` — Cartão não encontrado
 
+## Idempotência
+
+| Endpoint | Idempotente | Comportamento |
+|---|---|---|
+| `PATCH /cartoes/{numeroCartao}` | ✅ Sim | Se o status solicitado já é o atual, o update é ignorado — nenhuma escrita no banco |
+| `POST /cartoes` | ❌ Não | Cada chamada cria um novo cartão; retorna `422` se o número já existir |
+| `POST /transacoes` | ❌ Não | Cada chamada processa uma nova transação e debita o valor |
+| `GET *` | ✅ Sim | Consultas são intrinsicamente idempotentes |
+
+A idempotência do `PATCH` é implementada no use case: antes de persistir, o status atual é comparado com o solicitado. Se iguais, o método retorna sem chamar o repositório, evitando escritas desnecessárias e locks desnecessários.
+
 ### Concorrência
 
 
