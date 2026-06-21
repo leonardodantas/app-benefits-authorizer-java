@@ -11,7 +11,7 @@ Microsserviço de autorização de transações para cartões de benefícios. Re
 | Tecnologia | Versão | Propósito |
 |---|---|---|
 | Java | 21 | Runtime |
-| Spring Boot | 3.4+ | Framework principal |
+| Spring Boot | 4.1.0 | Framework principal |
 | Spring Data JPA | — | Persistência relacional |
 | MySQL | 8.0 | Banco de dados |
 | Flyway | — | Migration do schema |
@@ -21,6 +21,7 @@ Microsserviço de autorização de transações para cartões de benefícios. Re
 | JUnit 5 | — | Testes unitários |
 | Mockito | — | Mocks |
 | Testcontainers | 1.20 | Testes de integração com MySQL real |
+| Awaitility | 4.2 | Asserções assíncronas em testes |
 | ArchUnit | 1.3 | Testes de arquitetura |
 | SpringDoc OpenAPI | — | Documentação Swagger |
 | JaCoCo | 0.8.12 | Cobertura de código (100%) |
@@ -167,31 +168,37 @@ O relatório de cobertura estará em `target/site/jacoco/index.html`.
 
 ## Testes
 
-O projeto possui **19 arquivos de teste** distribuídos em três categorias:
+O projeto possui **25 arquivos de teste** distribuídos em três categorias:
 
-### Unitários (17)
+### Unitários (23)
 
 Testam classes isoladamente com mocks, sem infraestrutura externa.
 
 | Teste | O que valida |
 |---|---|
-| `CardControllerTest` | Endpoints de criar, consultar, listar, atualizar status e histórico de transações do cartão |
-| `TransactionControllerTest` | Endpoint de transação |
+| `CardControllerTest` | Endpoints de criar, consultar saldo, listar e atualizar status do cartão |
+| `CardTransactionControllerTest` | Histórico paginado de transações do cartão |
+| `TransactionControllerTest` | Endpoint de transação (sucesso e erros) |
 | `ApiExceptionHandlerTest` | Handlers de fallback (CustomException e RuntimeException) |
 | `CreateCardUseCaseImplTest` | Criação de cartão (sucesso e duplicado) |
 | `CreateTransactionUseCaseImplTest` | Execução de transação via executor |
 | `GetBalanceUseCaseImplTest` | Consulta de saldo (existe e não existe) |
 | `GetTransactionHistoryUseCaseImplTest` | Histórico paginado de transações |
+| `ListCardsUseCaseImplTest` | Listagem paginada de cartões |
 | `UpdateCardStatusUseCaseImplTest` | Atualização de status do cartão (bloqueio, desbloqueio, idempotência) |
 | `TransactionExecutorTest` | Sucesso, stop com exception e stop sem exception |
 | `TransactionHandlerTest` | Propagação da chain e captura de exceções |
 | `TransactionEventListenerTest` | Delegacão de evento para consumer |
-| `EventPublisherHandlerTest` | Publicação de evento após débito |
+| `TransactionEventTest` | Factory methods success/error |
 | `CardExistenceHandlerTest` | Validação de existência do cartão |
 | `CardBlockedHandlerTest` | Validação de cartão bloqueado |
 | `PasswordValidationHandlerTest` | Validação de senha |
 | `BalanceValidationHandlerTest` | Validação de saldo |
 | `DebitHandlerTest` | Débito e persistência do cartão |
+| `CardRepositoryImplTest` | Repositório de cartão (find, save, findAll) |
+| `TransactionLogRepositoryImplTest` | Repositório de log de transações |
+| `BCryptPasswordEncoderAdapterTest` | Adaptador BCrypt |
+| `LoggingTransactionEventConsumerTest` | Consumer de eventos |
 
 ### Integração (1)
 

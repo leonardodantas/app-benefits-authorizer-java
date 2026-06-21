@@ -4,6 +4,7 @@ import com.leotech.benefits.authorizer.api.handlers.ApiExceptionHandler;
 import com.leotech.benefits.authorizer.api.mappers.TransactionMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
 import com.leotech.benefits.authorizer.app.usecases.CreateTransactionUseCase;
+import com.leotech.benefits.authorizer.domain.card.CardBlockedException;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.InsufficientBalanceException;
 import com.leotech.benefits.authorizer.domain.transaction.InvalidPasswordException;
@@ -122,6 +123,25 @@ class TransactionControllerTest {
                                     """.formatted(CARD_NUMBER, PASSWORD)))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(content().string("SALDO_INSUFICIENTE"));
+        }
+
+        @Test
+        @DisplayName("should return 422 with CARTAO_BLOQUEADO when card is blocked")
+        void shouldReturn422CardBlocked() throws Exception {
+            final CreateTransactionRequest request = new CreateTransactionRequest(CARD_NUMBER, PASSWORD, AMOUNT);
+            final Transaction domain = new Transaction(CARD_NUMBER, PASSWORD, AMOUNT);
+
+            when(transactionMapper.toDomain(request)).thenReturn(domain);
+            doThrow(new CardBlockedException())
+                    .when(createTransactionUseCase).execute(domain);
+
+            mockMvc.perform(post("/transacoes")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"numeroCartao": "%s", "senhaCartao": "%s", "valor": %s}
+                                    """.formatted(CARD_NUMBER, PASSWORD, AMOUNT)))
+                    .andExpect(status().isUnprocessableEntity())
+                    .andExpect(content().string("CARTAO_BLOQUEADO"));
         }
 
         @Test

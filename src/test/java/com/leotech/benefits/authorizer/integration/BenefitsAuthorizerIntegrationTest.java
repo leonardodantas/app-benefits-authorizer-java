@@ -412,6 +412,25 @@ class BenefitsAuthorizerIntegrationTest {
                     new CreateTransactionRequest(BLOCK_CARD, "1234", new BigDecimal("10.00")));
             assertThat(transactionResult.status()).isEqualTo(201);
         }
+
+        @Test
+        @DisplayName("should persist CARTAO_BLOQUEADO error event in transaction history")
+        void shouldPersistBlockedErrorInHistory() {
+            final UpdateCardStatusRequest blockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.BLOCKED);
+
+            patchRaw("/cartoes/" + BLOCK_CARD, blockRequest);
+
+            postRaw("/transacoes", new CreateTransactionRequest(BLOCK_CARD, "1234", new BigDecimal("10.00")));
+
+            await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+                final RecordGetResult result = getRaw("/cartoes/" + BLOCK_CARD + "/transacoes?page=0&size=20");
+
+                assertThat(result.status()).isEqualTo(200);
+                assertThat(result.body()).contains("\"status\":\"ERROR\"");
+                assertThat(result.body()).contains("\"mensagem\":\"CARTAO_BLOQUEADO\"");
+            });
+        }
     }
 
     @Nested

@@ -6,11 +6,13 @@ import com.leotech.benefits.authorizer.app.usecases.impl.transaction.Transaction
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
-import com.leotech.benefits.authorizer.domain.shared.CustomException;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStoppedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class TransactionExecutor {
         chain.handle(context);
 
         if (context.getStatus() == HandlerStatus.STOP) {
-            if (context.getException() != null) {
+            if (Objects.nonNull(context.getException())) {
                 log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.getException().getMessage());
                 eventPublisher.publishEvent(TransactionEvent.error(
                         transaction.cardNumber(),
@@ -35,7 +37,12 @@ public class TransactionExecutor {
                 throw context.getException();
             }
             log.warn("Transaction stopped without exception for card {}", transaction.cardNumber());
-            return context.getCard();
+            final var stopException = new TransactionStoppedException();
+            eventPublisher.publishEvent(TransactionEvent.error(
+                    transaction.cardNumber(),
+                    stopException.getMessage()
+            ));
+            throw stopException;
         }
 
         log.info("Transaction executed successfully for card {}", transaction.cardNumber());

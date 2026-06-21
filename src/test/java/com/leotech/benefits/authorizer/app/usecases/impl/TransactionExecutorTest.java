@@ -7,6 +7,7 @@ import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionEvent;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionStoppedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,8 +88,8 @@ class TransactionExecutorTest {
     }
 
     @Test
-    @DisplayName("should return card when chain stops without exception")
-    void shouldReturnCardOnStopWithoutException() {
+    @DisplayName("should throw TransactionStoppedException when chain stops without exception")
+    void shouldThrowOnStopWithoutException() {
         final Card card = Card.builder()
                 .cardNumber("1234567890123456")
                 .balance(new BigDecimal("100.00"))
@@ -104,11 +105,16 @@ class TransactionExecutorTest {
         final TransactionExecutor executor = new TransactionExecutor(chain, eventPublisher);
         final Transaction transaction = new Transaction("1234567890123456", "1234", BigDecimal.TEN);
 
-        final Card result = executor.execute(transaction);
+        assertThatThrownBy(() -> executor.execute(transaction))
+                .isInstanceOf(TransactionStoppedException.class)
+                .hasMessage("TRANSACAO_INTERROMPIDA");
 
-        assertThat(result).isEqualTo(card);
         verify(chain).handle(any(TransactionContext.class));
-        verifyNoMoreInteractions(chain);
-        verifyNoInteractions(eventPublisher);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+
+        final TransactionEvent event = eventCaptor.getValue();
+        assertThat(event.status()).isEqualTo(com.leotech.benefits.authorizer.domain.transaction.TransactionStatus.ERROR);
+        assertThat(event.message()).isEqualTo("TRANSACAO_INTERROMPIDA");
+        verifyNoMoreInteractions(chain, eventPublisher);
     }
 }
