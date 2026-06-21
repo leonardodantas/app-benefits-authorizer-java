@@ -201,6 +201,14 @@ O relatório JaCoCo é publicado automaticamente no GitHub Pages a cada push na 
 https://leonardodantas.github.io/app-benefits-authorizer-java/
 ```
 
+## Desacoplamento de infraestrutura
+
+Graças aos princípios de Clean Architecture e à separação entre camadas, a infraestrutura é intercambiável sem alterar lógica de negócio:
+
+- **Banco de dados**: a camada `app` conhece apenas interfaces de repositório (`CardRepository`, `TransactionLogRepository`). A implementação atual usa JPA/MySQL, mas poderia ser substituída por MongoDB, PostgreSQL ou qualquer outra tecnologia sem alterar uma linha dos use cases ou domínio.
+- **Eventos**: a publicação de eventos (`TransactionEvent`) é feita via `ApplicationEventPublisher` (Spring), com um consumer em `infra` que persiste no banco. Esse consumer poderia ser substituído por um publisher Kafka ou RabbitMQ sem impacto no domínio ou nos use cases — bastaria criar uma nova implementação de `TransactionEventConsumer` em `infra`.
+- **Senhas**: o hashing de senhas é abstraído pela interface `PasswordEncoder` em `app`. A implementação atual usa jBCrypt, mas poderia ser trocada para PBKDF2, Argon2 ou qualquer outro algoritmo trocando apenas o bean em `infra`.
+
 ## Overengineering consciente
 
 Algumas decisões neste projeto foram intencionalmente levadas além do estritamente necessário para o problema atual. O objetivo é demonstrar domínio técnico sobre padrões, ferramentas e boas práticas, mesmo que para um cenário simples:

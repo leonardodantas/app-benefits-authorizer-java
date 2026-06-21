@@ -200,7 +200,7 @@ class BenefitsAuthorizerIntegrationTest {
         @Test
         @DisplayName("should return 422 with CARTAO_INEXISTENTE when card does not exist")
         void shouldReturn422CardNotExists() {
-            final CreateTransactionRequest request = new CreateTransactionRequest("9999999999999999", "1234", new BigDecimal("10.00"));
+            final CreateTransactionRequest request = new CreateTransactionRequest("9999999999999991", "1234", new BigDecimal("10.00"));
             final PostResult result = postRaw("/transacoes", request);
 
             assertThat(result.status()).isEqualTo(422);
