@@ -70,7 +70,6 @@ class CardRepositoryImplTest {
         final CardEntity savedEntity = CardEntity.builder().id(1L).cardNumber("1234567890123456").password("1234").balance(BigDecimal.TEN).build();
         final Card savedDomain = Card.builder().id(1L).cardNumber("1234567890123456").password("1234").balance(BigDecimal.TEN).build();
 
-        when(jpaCardRepository.findByCardNumber("1234567890123456")).thenReturn(Optional.empty());
         when(cardInfraMapper.toEntity(domainCard)).thenReturn(entity);
         when(jpaCardRepository.save(entity)).thenReturn(savedEntity);
         when(cardInfraMapper.toDomain(savedEntity)).thenReturn(savedDomain);
@@ -79,9 +78,9 @@ class CardRepositoryImplTest {
 
         assertThat(result.cardNumber()).isEqualTo("1234567890123456");
         assertThat(result.id()).isEqualTo(1L);
-        verify(jpaCardRepository).findByCardNumber("1234567890123456");
         verify(cardInfraMapper).toEntity(domainCard);
         verify(jpaCardRepository).save(entity);
         verify(cardInfraMapper).toDomain(savedEntity);
+        verifyNoMoreInteractions(jpaCardRepository, cardInfraMapper);
     }
 }
