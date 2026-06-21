@@ -25,13 +25,17 @@ public class TransactionExecutor {
         final TransactionContext context = new TransactionContext(transaction);
         chain.handle(context);
 
-        if (context.getStatus() == HandlerStatus.STOP && context.getException() != null) {
-            log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.getException().getMessage());
-            eventPublisher.publishEvent(TransactionEvent.error(
-                    transaction.cardNumber(),
-                    context.getException().getMessage()
-            ));
-            throw context.getException();
+        if (context.getStatus() == HandlerStatus.STOP) {
+            if (context.getException() != null) {
+                log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.getException().getMessage());
+                eventPublisher.publishEvent(TransactionEvent.error(
+                        transaction.cardNumber(),
+                        context.getException().getMessage()
+                ));
+                throw context.getException();
+            }
+            log.warn("Transaction stopped without exception for card {}", transaction.cardNumber());
+            return context.getCard();
         }
 
         log.info("Transaction executed successfully for card {}", transaction.cardNumber());
