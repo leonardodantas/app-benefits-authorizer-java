@@ -67,6 +67,7 @@ Resposta
 | Método | Caminho | Descrição |
 |---|---|---|
 | `POST` | `/cartoes` | Criar cartão |
+| `GET` | `/cartoes` | Listar cartões (paginado) |
 | `GET` | `/cartoes/{numeroCartao}` | Consultar saldo |
 | `POST` | `/transacoes` | Processar transação |
 | `GET` | `/transacoes/{numeroCartao}` | Histórico paginado de transações |
