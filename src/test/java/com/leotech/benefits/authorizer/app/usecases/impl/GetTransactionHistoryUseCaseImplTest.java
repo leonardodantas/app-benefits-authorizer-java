@@ -45,4 +45,20 @@ class GetTransactionHistoryUseCaseImplTest {
         verify(transactionLogRepository).findByCardNumber("123", PageRequest.of(0, 20));
         verifyNoMoreInteractions(transactionLogRepository);
     }
+
+    @Test
+    @DisplayName("should return empty page when no transactions")
+    void shouldReturnEmptyPage() {
+        final Page<TransactionEvent> emptyPage = Page.empty();
+
+        when(transactionLogRepository.findByCardNumber("123", PageRequest.of(0, 20)))
+                .thenReturn(emptyPage);
+
+        final Page<TransactionEvent> result = useCase.execute("123", 0, 20);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
+        verify(transactionLogRepository).findByCardNumber("123", PageRequest.of(0, 20));
+        verifyNoMoreInteractions(transactionLogRepository);
+    }
 }

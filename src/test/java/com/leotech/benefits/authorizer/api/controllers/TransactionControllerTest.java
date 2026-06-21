@@ -193,5 +193,21 @@ class TransactionControllerTest {
             verify(getTransactionHistoryUseCase).execute(CARD_NUMBER, 0, 20);
             verify(transactionMapper).toResponse(event);
         }
+
+        @Test
+        @DisplayName("should return 200 with empty page when no transactions")
+        void shouldReturn200Empty() throws Exception {
+            final Page<TransactionEvent> emptyPage = Page.empty();
+
+            when(getTransactionHistoryUseCase.execute(CARD_NUMBER, 0, 20)).thenReturn(emptyPage);
+
+            mockMvc.perform(get("/transacoes/{numeroCartao}", CARD_NUMBER))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isEmpty())
+                    .andExpect(jsonPath("$.totalElements").value(0));
+
+            verify(getTransactionHistoryUseCase).execute(CARD_NUMBER, 0, 20);
+            verifyNoInteractions(transactionMapper);
+        }
     }
 }

@@ -60,4 +60,20 @@ class TransactionLogRepositoryImplTest {
         verify(transactionLogInfraMapper).toDomain(entity);
         verifyNoMoreInteractions(jpaTransactionLogRepository, transactionLogInfraMapper);
     }
+
+    @Test
+    @DisplayName("should return empty page when no transactions found")
+    void shouldReturnEmptyPage() {
+        final PageRequest pageRequest = PageRequest.of(0, 20);
+        final Page<TransactionLogEntity> emptyPage = Page.empty();
+
+        when(jpaTransactionLogRepository.findByCardNumberOrderByTimestampDesc("1234567890123456", pageRequest))
+                .thenReturn(emptyPage);
+
+        final Page<TransactionEvent> result = repository.findByCardNumber("1234567890123456", pageRequest);
+
+        assertThat(result.getContent()).isEmpty();
+        verify(jpaTransactionLogRepository).findByCardNumberOrderByTimestampDesc("1234567890123456", pageRequest);
+        verifyNoInteractions(transactionLogInfraMapper);
+    }
 }

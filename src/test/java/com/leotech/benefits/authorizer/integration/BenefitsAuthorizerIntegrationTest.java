@@ -270,6 +270,15 @@ class BenefitsAuthorizerIntegrationTest {
             assertThat(result.body()).contains("valor");
             assertThat(result.body()).contains("dataHora");
         }
+
+        @Test
+        @DisplayName("should return 200 with empty content when card has no transactions")
+        void shouldReturn200Empty() {
+            final var result = getRaw("/transacoes/8888888888888888" + "?page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("\"content\":[]");
+        }
     }
 
     @Nested
