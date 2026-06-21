@@ -123,14 +123,6 @@ Retorna o histórico paginado de transações de um cartão, ordenado da mais re
 
 - `200` — Histórico retornado com sucesso
 
-## Idempotência
-
-Recursos idempotentes garantem que múltiplas chamadas idênticas produzam o mesmo resultado que uma única chamada, sem efeitos colaterais extras. No projeto, o `PATCH /cartoes/{numeroCartao}` é idempotente — se o cartão já estiver no status solicitado, nenhuma escrita no banco é realizada. Consultas (`GET`) são naturalmente idempotentes. Já criações (`POST`) não o são, pois cada requisição gera um novo recurso.
-
-## Concorrência
-
-Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
-
 ## Como Executar
 
 ### Pré-requisitos
@@ -249,6 +241,14 @@ Algumas decisões neste projeto foram intencionalmente levadas além do estritam
 - **Event publishing com `ApplicationEventPublisher`** — para o tamanho do projeto, logar a transação no banco diretamente resolveria. A camada extra de eventos + `@Async` + interface em `app` com implementação em `infra` existe para demonstrar arquitetura orientada a eventos.
 - **Índice composto `(card_number, status)`** — o índice simples em `card_number` já é suficiente para o volume esperado. O índice composto foi adicionado para demonstrar conhecimento em modelagem de índices e otimização de consultas.
 - **Testes de arquitetura com ArchUnit** — para um projeto pequeno, testes funcionais já bastam. O ArchUnit foi incluído para garantir que a arquitetura definida não seja violada conforme o projeto cresce.
+
+## Concorrência
+
+Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
+
+## Idempotência
+
+Recursos idempotentes garantem que múltiplas chamadas idênticas produzam o mesmo resultado que uma única chamada, sem efeitos colaterais extras. No projeto, o `PATCH /cartoes/{numeroCartao}` é idempotente — se o cartão já estiver no status solicitado, nenhuma escrita no banco é realizada. Consultas (`GET`) são naturalmente idempotentes. Já criações (`POST`) não o são, pois cada requisição gera um novo recurso.
 
 ## Commits
 
