@@ -1,8 +1,10 @@
 package com.leotech.benefits.authorizer.api.controllers;
 
 import com.leotech.benefits.authorizer.api.mappers.CardMapper;
+import com.leotech.benefits.authorizer.api.requests.AddBalanceRequest;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
+import com.leotech.benefits.authorizer.app.usecases.AddBalanceUseCase;
 import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +38,7 @@ public class CardController {
 
     private final CreateCardUseCase createCardUseCase;
     private final GetBalanceUseCase getBalanceUseCase;
+    private final AddBalanceUseCase addBalanceUseCase;
     private final CardMapper cardMapper;
 
     @PostMapping
@@ -61,5 +65,17 @@ public class CardController {
         final BigDecimal balance = getBalanceUseCase.execute(cardNumber);
         log.info("Balance for card {} is {}", cardNumber, balance);
         return balance;
+    }
+
+    @PatchMapping("/{numeroCartao}/saldo")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Adicionar saldo", description = "Adiciona saldo positivo ao cartão")
+    @ApiResponse(responseCode = "200", description = "Saldo adicionado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Cartão não encontrado", content = @Content)
+    public void addBalance(@PathVariable("numeroCartao") final String cardNumber,
+                           @RequestBody @Valid final AddBalanceRequest request) {
+        log.info("Adding balance to card {}: {}", cardNumber, request.amount());
+        addBalanceUseCase.execute(cardNumber, request.amount());
+        log.info("Balance added to card {}", cardNumber);
     }
 }
