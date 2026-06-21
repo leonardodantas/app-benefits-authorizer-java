@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.leotech.benefits.authorizer.domain.card.CardStatus.BLOCKED;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,13 +32,17 @@ public class UpdateCardStatusUseCaseImpl implements UpdateCardStatusUseCase {
             return card;
         }
 
-        final Card updatedCard = switch (newStatus) {
-            case BLOCKED -> card.block();
-            case ACTIVE -> card.unblock();
-        };
+        final Card updatedCard = getUpdateCard(newStatus, card);
 
         final Card saved = cardRepository.save(updatedCard);
         log.info("Card {} status updated to {}", cardNumber, saved.status());
         return saved;
+    }
+
+    private static Card getUpdateCard(final CardStatus newStatus, final Card card) {
+        if (BLOCKED == newStatus) {
+            return card.block();
+        }
+        return card.unblock();
     }
 }

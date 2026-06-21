@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +18,9 @@ public class GetTransactionHistoryUseCaseImpl implements GetTransactionHistoryUs
     private final TransactionLogRepository transactionLogRepository;
 
     @Override
-    @Transactional(readOnly = true)
     public Page<TransactionEvent> execute(final String cardNumber, final TransactionStatus status,
                                            final int page, final int size) {
-        if (status != null) {
+        if (Objects.nonNull(status)) {
             return transactionLogRepository.findByCardNumber(cardNumber, status, PageRequest.of(page, size));
         }
         return transactionLogRepository.findByCardNumber(cardNumber, PageRequest.of(page, size));

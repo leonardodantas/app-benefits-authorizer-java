@@ -27,21 +27,29 @@ public class CreateCardUseCaseImpl implements CreateCardUseCase {
     @Transactional
     public Card execute(final Card card) {
         log.info("Creating card {}", card.cardNumber());
+        validateCardExist(card);
+
+        final Card cardToSave = getCardToSave(card);
+        final Card saved = cardRepository.save(cardToSave);
+
+        log.info("Card {} created with balance {}", saved.cardNumber(), saved.balance());
+        return saved;
+    }
+
+    private void validateCardExist(final Card card) {
         cardRepository.findByCardNumber(card.cardNumber())
                 .ifPresent(found -> {
                     throw new CardAlreadyExistsException(card.cardNumber());
                 });
+    }
 
+    private Card getCardToSave(final Card card) {
         final String encryptedPassword = passwordEncoder.encode(card.password());
         final BigDecimal balance = appProperties.initialBalance();
-        final Card cardWithBalance = card.toBuilder()
+        return card.toBuilder()
                 .password(encryptedPassword)
                 .balance(balance)
                 .status(CardStatus.ACTIVE)
                 .build();
-
-        final Card saved = cardRepository.save(cardWithBalance);
-        log.info("Card {} created with balance {}", saved.cardNumber(), saved.balance());
-        return saved;
     }
 }
