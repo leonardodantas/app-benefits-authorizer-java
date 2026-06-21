@@ -193,6 +193,14 @@ JaCoCo configurado com 100% de cobertura obrigatória para código produtivo (ex
 
 O projeto possui GitHub Actions configurado para executar `mvn verify` em pushes e pull requests para a branch `main`.
 
+### Relatório de cobertura
+
+O relatório JaCoCo é publicado automaticamente no GitHub Pages a cada push na `main`. Disponível em:
+
+```
+https://leonardodantas.github.io/app-benefits-authorizer-java/
+```
+
 ## Commits
 
 O projeto segue [Conventional Commits](https://www.conventionalcommits.org/):
