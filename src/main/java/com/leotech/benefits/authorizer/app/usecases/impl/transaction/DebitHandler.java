@@ -27,7 +27,7 @@ public final class DebitHandler extends TransactionHandler {
                 .build();
 
         cardRepository.save(updated);
-        context.setStatus(HandlerStatus.SUCCESS);
+        context.setStatus(HandlerStatus.CONTINUE);
         log.info("Card {} updated with new balance {}", card.cardNumber(), newBalance);
     }
 }

@@ -42,7 +42,7 @@ class DebitHandlerTest {
 
         handler.doHandle(context);
 
-        assertThat(context.getStatus()).isEqualTo(HandlerStatus.SUCCESS);
+        assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
         verify(cardRepository).save(cardCaptor.capture());
 
         final Card saved = cardCaptor.getValue();

@@ -3,14 +3,19 @@ package com.leotech.benefits.authorizer.config;
 import com.leotech.benefits.authorizer.app.repositories.CardRepository;
 import com.leotech.benefits.authorizer.app.services.PasswordEncoder;
 import com.leotech.benefits.authorizer.app.usecases.impl.transaction.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
+@EnableAsync
 public class TransactionChainConfig {
 
     @Bean
-    public TransactionHandler transactionChain(final CardRepository cardRepository, final PasswordEncoder passwordEncoder) {
+    public TransactionHandler transactionChain(final CardRepository cardRepository, final PasswordEncoder passwordEncoder,
+                                               final ApplicationEventPublisher eventPublisher) {
+        final TransactionHandler eventPublisherHandler = new EventPublisherHandler(eventPublisher);
         final TransactionHandler debit = new DebitHandler(cardRepository);
         final TransactionHandler balanceValidation = new BalanceValidationHandler();
         final TransactionHandler passwordValidation = new PasswordValidationHandler(passwordEncoder);
@@ -19,6 +24,7 @@ public class TransactionChainConfig {
         cardExistence.setNext(passwordValidation);
         passwordValidation.setNext(balanceValidation);
         balanceValidation.setNext(debit);
+        debit.setNext(eventPublisherHandler);
 
         return cardExistence;
     }
