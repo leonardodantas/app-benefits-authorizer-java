@@ -2,17 +2,24 @@ package com.leotech.benefits.authorizer.arch;
 
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 class ArchitectureTest {
 
     private static final String BASE = "com.leotech.benefits.authorizer";
+    private static com.tngtech.archunit.core.domain.JavaClasses classes;
 
-    private static ClassFileImporter importer() {
-        return new ClassFileImporter().withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
+    @BeforeAll
+    static void setUp() {
+        classes = new ClassFileImporter()
+                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                .importPackages(BASE);
     }
 
     @Test
@@ -22,7 +29,7 @@ class ArchitectureTest {
                 .that().resideInAPackage("..domain..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".app..", BASE + ".infra..", BASE + ".config")
-                .check(importer().importPackages(BASE));
+                .check(classes);
     }
 
     @Test
@@ -32,7 +39,7 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".api..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".infra..")
-                .check(importer().importPackages(BASE));
+                .check(classes);
     }
 
     @Test
@@ -42,7 +49,7 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".app..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".infra..")
-                .check(importer().importPackages(BASE));
+                .check(classes);
     }
 
     @Test
@@ -52,6 +59,44 @@ class ArchitectureTest {
                 .that().resideInAPackage(BASE + ".infra..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(BASE + ".api..", BASE + ".config")
-                .check(importer().importPackages(BASE));
+                .check(classes);
+    }
+
+    @Test
+    @DisplayName("api must not depend on config")
+    void apiMustNotDependOnConfig() {
+        noClasses()
+                .that().resideInAPackage(BASE + ".api..")
+                .should().dependOnClassesThat()
+                .resideInAnyPackage(BASE + ".config")
+                .check(classes);
+    }
+
+    @Test
+    @DisplayName("controllers must be only in api layer")
+    void controllersMustBeOnlyInApi() {
+        noClasses()
+                .that().areAnnotatedWith("org.springframework.web.bind.annotation.RestController")
+                .should().resideOutsideOfPackage(BASE + ".api..")
+                .check(classes);
+    }
+
+    @Test
+    @DisplayName("services must be only in app layer")
+    void servicesMustBeOnlyInApp() {
+        noClasses()
+                .that().areAnnotatedWith("org.springframework.stereotype.Service")
+                .should().resideOutsideOfPackage(BASE + ".app..")
+                .check(classes);
+    }
+
+    @Test
+    @DisplayName("repositories must be only in infra layer")
+    void repositoriesMustBeOnlyInInfra() {
+        noClasses()
+                .that().areAnnotatedWith("org.springframework.stereotype.Repository")
+                .or().areAnnotatedWith("org.springframework.data.jpa.repository.JpaRepository")
+                .should().resideOutsideOfPackage(BASE + ".infra..")
+                .check(classes);
     }
 }
