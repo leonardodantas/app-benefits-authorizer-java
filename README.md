@@ -257,6 +257,10 @@ Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTI
 
 Recursos idempotentes garantem que múltiplas chamadas idênticas produzam o mesmo resultado que uma única chamada, sem efeitos colaterais extras. No projeto, o `PATCH /cartoes/{numeroCartao}` é idempotente — se o cartão já estiver no status solicitado, nenhuma escrita no banco é realizada. Consultas (`GET`) são naturalmente idempotentes. Já criações (`POST`) não o são, pois cada requisição gera um novo recurso.
 
+## Desenvolvimento com IA
+
+Este projeto foi desenvolvido com auxílio de [DeepSeek](https://deepseek.com) (via opencode) como ferramenta de execução. A IA atuou como um desenvolvedor júnior — recebendo instruções diretas, implementando alterações sob orientação e tendo cada decisão validada antes de ser efetivada. O `AGENTS.md` definiu as regras de arquitetura, estilo e boas práticas que nortearam todas as interações. O planejamento, as escolhas arquiteturais e a validação final permaneceram sob responsabilidade humana.
+
 ## Commits
 
 O projeto segue [Conventional Commits](https://www.conventionalcommits.org/):
