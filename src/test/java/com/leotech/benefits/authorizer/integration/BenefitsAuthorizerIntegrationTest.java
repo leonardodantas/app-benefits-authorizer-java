@@ -5,7 +5,7 @@ import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
 import com.leotech.benefits.authorizer.api.requests.CreateTransactionRequest;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.test.context.jdbc.Sql;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@Sql(statements = "DELETE FROM cards", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class BenefitsAuthorizerIntegrationTest {
 
     @Container
@@ -50,7 +49,7 @@ class BenefitsAuthorizerIntegrationTest {
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
         registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
     }
 
     @LocalServerPort
