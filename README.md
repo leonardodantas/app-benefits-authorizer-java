@@ -201,6 +201,15 @@ O relatório JaCoCo é publicado automaticamente no GitHub Pages a cada push na 
 https://leonardodantas.github.io/app-benefits-authorizer-java/
 ```
 
+## Overengineering consciente
+
+Algumas decisões neste projeto foram intencionalmente levadas além do estritamente necessário para o problema atual. O objetivo é demonstrar domínio técnico sobre padrões, ferramentas e boas práticas, mesmo que para um cenário simples:
+
+- **Chain of Responsibility com `HandlerStatus`** — uma chain com 3 handlers validadores + 1 handler de débito já resolveria. O `HandlerStatus` (`CONTINUE`, `STOP`, `SUCCESS`) e o tratamento de exceções via contexto foram adicionados para mostrar controle de fluxo explícito e desacoplamento entre handlers.
+- **Event publishing com `ApplicationEventPublisher`** — para o tamanho do projeto, logar a transação no banco diretamente resolveria. A camada extra de eventos + `@Async` + interface em `app` com implementação em `infra` existe para demonstrar arquitetura orientada a eventos.
+- **Índice composto `(card_number, status)`** — o índice simples em `card_number` já é suficiente para o volume esperado. O índice composto foi adicionado para demonstrar conhecimento em modelagem de índices e otimização de consultas.
+- **Testes de arquitetura com ArchUnit** — para um projeto pequeno, testes funcionais já bastam. O ArchUnit foi incluído para garantir que a arquitetura definida não seja violada conforme o projeto cresce.
+
 ## Commits
 
 O projeto segue [Conventional Commits](https://www.conventionalcommits.org/):
