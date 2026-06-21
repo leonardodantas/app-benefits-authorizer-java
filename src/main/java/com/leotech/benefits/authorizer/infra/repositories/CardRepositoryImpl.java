@@ -6,6 +6,8 @@ import com.leotech.benefits.authorizer.infra.entities.CardEntity;
 import com.leotech.benefits.authorizer.infra.mappers.CardInfraMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -29,6 +31,13 @@ public class CardRepositoryImpl implements CardRepository {
     public Optional<Card> findWithLockByCardNumber(final String cardNumber) {
         log.debug("Finding card with lock by number {}", cardNumber);
         return jpaCardRepository.findWithLockByCardNumber(cardNumber)
+                .map(cardInfraMapper::toDomain);
+    }
+
+    @Override
+    public Page<Card> findAll(final Pageable pageable) {
+        log.debug("Finding all cards with pagination");
+        return jpaCardRepository.findAll(pageable)
                 .map(cardInfraMapper::toDomain);
     }
 

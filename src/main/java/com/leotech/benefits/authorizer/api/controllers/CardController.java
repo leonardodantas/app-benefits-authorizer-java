@@ -2,9 +2,11 @@ package com.leotech.benefits.authorizer.api.controllers;
 
 import com.leotech.benefits.authorizer.api.mappers.CardMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
+import com.leotech.benefits.authorizer.api.responses.CardSummaryResponse;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
+import com.leotech.benefits.authorizer.app.usecases.ListCardsUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,12 +17,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +39,7 @@ public class CardController {
 
     private final CreateCardUseCase createCardUseCase;
     private final GetBalanceUseCase getBalanceUseCase;
+    private final ListCardsUseCase listCardsUseCase;
     private final CardMapper cardMapper;
 
     @PostMapping
@@ -61,5 +66,15 @@ public class CardController {
         final BigDecimal balance = getBalanceUseCase.execute(cardNumber);
         log.info("Balance for card {} is {}", cardNumber, balance);
         return balance;
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar cartões", description = "Retorna a lista paginada de cartões")
+    public Page<CardSummaryResponse> list(
+            @RequestParam(defaultValue = "0") final int page,
+            @RequestParam(defaultValue = "20") final int size) {
+        log.info("Listing cards page={}, size={}", page, size);
+        return listCardsUseCase.execute(page, size)
+                .map(cardMapper::toSummaryResponse);
     }
 }

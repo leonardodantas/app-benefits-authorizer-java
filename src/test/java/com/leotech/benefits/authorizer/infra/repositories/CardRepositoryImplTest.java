@@ -13,7 +13,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -92,5 +97,26 @@ class CardRepositoryImplTest {
         assertThat(result.cardNumber()).isEqualTo("1234567890123456");
         assertThat(result.balance()).isEqualByComparingTo(BigDecimal.TEN);
         verify(jpaCardRepository).save(any(CardEntity.class));
+    }
+
+    @Test
+    @DisplayName("should find all cards with pagination")
+    void shouldFindAll() {
+        final CardEntity entity = CardEntity.builder()
+                .cardNumber("1234567890123456")
+                .password("encrypted")
+                .balance(new BigDecimal("100.00"))
+                .build();
+        final PageRequest pageRequest = PageRequest.of(0, 20);
+        final Page<CardEntity> entityPage = new PageImpl<>(List.of(entity));
+
+        when(jpaCardRepository.findAll(pageRequest)).thenReturn(entityPage);
+
+        final Page<Card> result = repository.findAll(pageRequest);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().cardNumber()).isEqualTo("1234567890123456");
+        assertThat(result.getContent().getFirst().balance()).isEqualByComparingTo(new BigDecimal("100.00"));
+        verify(jpaCardRepository).findAll(pageRequest);
     }
 }

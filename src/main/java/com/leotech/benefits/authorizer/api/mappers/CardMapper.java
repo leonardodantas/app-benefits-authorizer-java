@@ -1,6 +1,7 @@
 package com.leotech.benefits.authorizer.api.mappers;
 
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
+import com.leotech.benefits.authorizer.api.responses.CardSummaryResponse;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import org.mapstruct.Mapper;
@@ -18,4 +19,6 @@ public interface CardMapper {
     Card toDomain(CreateCardRequest request);
 
     CreateCardResponse toResponse(Card card);
+
+    CardSummaryResponse toSummaryResponse(Card card);
 }

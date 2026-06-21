@@ -147,6 +147,24 @@ class BenefitsAuthorizerIntegrationTest {
     }
 
     @Nested
+    @DisplayName("GET /cartoes")
+    class ListCards {
+
+        @Test
+        @DisplayName("should return 200 with paginated cards")
+        void shouldReturn200() {
+            postRaw("/cartoes", new CreateCardRequest("1111111111111111", "1234"));
+            postRaw("/cartoes", new CreateCardRequest("2222222222222222", "1234"));
+
+            final RecordGetResult result = getRaw("/cartoes?page=0&size=20");
+
+            assertThat(result.status()).isEqualTo(200);
+            assertThat(result.body()).contains("numeroCartao");
+            assertThat(result.body()).contains("saldo");
+        }
+    }
+
+    @Nested
     @DisplayName("GET /cartoes/{numeroCartao}")
     class GetBalance {
 

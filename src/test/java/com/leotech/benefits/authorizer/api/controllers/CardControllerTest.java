@@ -3,9 +3,11 @@ package com.leotech.benefits.authorizer.api.controllers;
 import com.leotech.benefits.authorizer.api.handlers.ApiExceptionHandler;
 import com.leotech.benefits.authorizer.api.mappers.CardMapper;
 import com.leotech.benefits.authorizer.api.requests.CreateCardRequest;
+import com.leotech.benefits.authorizer.api.responses.CardSummaryResponse;
 import com.leotech.benefits.authorizer.api.responses.CreateCardResponse;
 import com.leotech.benefits.authorizer.app.usecases.CreateCardUseCase;
 import com.leotech.benefits.authorizer.app.usecases.GetBalanceUseCase;
+import com.leotech.benefits.authorizer.app.usecases.ListCardsUseCase;
 import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardAlreadyExistsException;
 import com.leotech.benefits.authorizer.domain.card.CardNotFoundException;
@@ -16,11 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,6 +44,9 @@ class CardControllerTest {
 
     @MockitoBean
     private GetBalanceUseCase getBalanceUseCase;
+
+    @MockitoBean
+    private ListCardsUseCase listCardsUseCase;
 
     @MockitoBean
     private CardMapper cardMapper;
@@ -165,6 +173,33 @@ class CardControllerTest {
             verify(getBalanceUseCase).execute(CARD_NUMBER);
             verifyNoMoreInteractions(getBalanceUseCase);
             verifyNoInteractions(createCardUseCase, cardMapper);
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /cartoes")
+    class ListCards {
+
+        @Test
+        @DisplayName("should return 200 and paginated cards")
+        void shouldReturn200() throws Exception {
+            final Card card = Card.builder()
+                    .cardNumber(CARD_NUMBER)
+                    .balance(BALANCE)
+                    .build();
+            final Page<Card> page = new PageImpl<>(List.of(card));
+            final CardSummaryResponse response = new CardSummaryResponse(CARD_NUMBER, BALANCE);
+
+            when(listCardsUseCase.execute(0, 20)).thenReturn(page);
+            when(cardMapper.toSummaryResponse(card)).thenReturn(response);
+
+            mockMvc.perform(get("/cartoes"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content[0].numeroCartao").value(CARD_NUMBER))
+                    .andExpect(jsonPath("$.content[0].saldo").value(BALANCE));
+
+            verify(listCardsUseCase).execute(0, 20);
+            verify(cardMapper).toSummaryResponse(card);
         }
     }
 }
