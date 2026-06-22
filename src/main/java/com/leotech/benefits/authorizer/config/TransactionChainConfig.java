@@ -15,18 +15,12 @@ public class TransactionChainConfig {
 
     @Bean
     public TransactionHandler transactionChain(final CardRepository cardRepository, final PasswordEncoder passwordEncoder) {
-        final TransactionHandler debit = new DebitHandler(cardRepository);
-        final TransactionHandler balanceValidation = new BalanceValidationHandler();
-        final TransactionHandler passwordValidation = new PasswordValidationHandler(passwordEncoder);
-        final TransactionHandler cardBlocked = new CardBlockedHandler();
-        final TransactionHandler cardExistence = new CardExistenceHandler(cardRepository);
-
-        cardExistence.setNext(cardBlocked);
-        cardBlocked.setNext(passwordValidation);
-        passwordValidation.setNext(balanceValidation);
-        balanceValidation.setNext(debit);
-
-        return cardExistence;
+        final CardExistenceHandler first = new CardExistenceHandler(cardRepository);
+        first.then(new CardBlockedHandler())
+                .then(new PasswordValidationHandler(passwordEncoder))
+                .then(new BalanceValidationHandler())
+                .then(new DebitHandler(cardRepository));
+        return first;
     }
 
 }
