@@ -58,6 +58,30 @@ class TransactionHandlerTest {
     }
 
     @Nested
+    @DisplayName("when handler stops")
+    class WhenHandlerStops {
+
+        @Test
+        @DisplayName("should not propagate when status is not CONTINUE")
+        void shouldNotPropagateWhenNotContinue() {
+            final TransactionHandler first = mock(TransactionHandler.class, CALLS_REAL_METHODS);
+            final TransactionHandler second = mock(TransactionHandler.class, CALLS_REAL_METHODS);
+
+            first.then(second);
+
+            when(first.doHandle(any(TransactionContext.class))).thenAnswer(invocation -> {
+                final TransactionContext ctx = invocation.getArgument(0);
+                return ctx.withStatus(HandlerStatus.STOP);
+            });
+
+            final TransactionContext result = first.handle(context);
+
+            assertThat(result.status()).isEqualTo(HandlerStatus.STOP);
+            verify(second, never()).doHandle(any(TransactionContext.class));
+        }
+    }
+
+    @Nested
     @DisplayName("when handler throws")
     class WhenHandlerThrows {
 

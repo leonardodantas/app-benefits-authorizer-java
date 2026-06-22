@@ -17,13 +17,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -42,19 +42,19 @@ class CardControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @MockBean
     private CreateCardUseCase createCardUseCase;
 
-    @MockitoBean
+    @MockBean
     private GetBalanceUseCase getBalanceUseCase;
 
-    @MockitoBean
+    @MockBean
     private ListCardsUseCase listCardsUseCase;
 
-    @MockitoBean
+    @MockBean
     private UpdateCardStatusUseCase updateCardStatusUseCase;
 
-    @MockitoBean
+    @MockBean
     private CardMapper cardMapper;
 
     private static final String CARD_NUMBER = "1234567890123456";

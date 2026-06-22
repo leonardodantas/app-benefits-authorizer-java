@@ -8,6 +8,7 @@ import com.leotech.benefits.authorizer.domain.shared.CustomException;
 import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.InsufficientBalanceException;
 import com.leotech.benefits.authorizer.domain.transaction.InvalidPasswordException;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -78,6 +79,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<String> handleCardBlocked(final CardBlockedException ex) {
         log.warn("Card blocked: {}", ex.getMessage());
         return ResponseEntity.status(422).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<String> handleTransactionSystem(final TransactionSystemException ex) {
+        log.error("Transaction system error", ex);
+        return ResponseEntity.status(500).body(ex.getMessage());
     }
 
     @ExceptionHandler(CustomException.class)

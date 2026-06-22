@@ -11,7 +11,7 @@ Microsserviço de autorização de transações para cartões de benefícios. Re
 | Tecnologia | Versão | Propósito |
 |---|---|---|
 | Java | 21 | Runtime |
-| Spring Boot | 4.1.0 | Framework principal |
+| Spring Boot | 3.3.5 | Framework principal |
 | Spring Data JPA | — | Persistência relacional |
 | MySQL | 5.7 | Banco de dados |
 | Flyway | — | Migration do schema |
@@ -257,8 +257,42 @@ Algumas decisões neste projeto foram intencionalmente levadas além do estritam
 
 ## Concorrência
 
-Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`,
+Transações concorrentes para o mesmo cartão são serializadas via `SELECT ... FOR UPDATE`,
 garantindo que não haja condição de corrida no saldo.
+
+### Como funciona
+
+O `FOR UPDATE` aplica um **row-level lock** no MySQL: a primeira transação que lê o cartão
+tranca aquela linha. Qualquer outra transação que tente ler o mesmo cartão com `FOR UPDATE`
+**espera** até a primeira finalizar (`COMMIT` ou `ROLLBACK`). Leituras simples (sem `FOR UPDATE`)
+não são bloqueadas.
+
+```
+T1: SELECT ... FOR UPDATE → adquire lock
+T2: SELECT ... FOR UPDATE → ESPERA T1
+T1: UPDATE saldo → COMMIT → libera lock
+T2: → lê saldo atualizado → prossegue
+```
+
+### Por que native query em vez de `@Lock`?
+
+A forma mais idiomática no Spring Data JPA seria:
+
+```java
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+Optional<CardEntity> findWithLockByCardNumber(String cardNumber);
+```
+
+Porém, o Hibernate 6 gera `SELECT ... FOR UPDATE OF alias`, sintaxe que o **MySQL 5.7**
+(exigido pela infraestrutura) rejeita. Por isso usamos uma native query com `FOR UPDATE`
+puro, que tem o mesmo efeito prático mas é compatível com a versão do banco.
+
+### E se o banco fosse atualizado?
+
+Se no futuro o MySQL for migrado para 8.0+, a anotação `@Lock` pode substituir a
+native query sem alterar comportamento — basta trocar a implementação no repositório.
+
+### Por que lock pessimista?
 
 A escolha do lock pessimista em vez do otimista foi deliberada:
 

@@ -1,9 +1,8 @@
 package com.leotech.benefits.authorizer.infra.repositories;
 
 import com.leotech.benefits.authorizer.infra.entities.CardEntity;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
@@ -11,6 +10,6 @@ public interface JpaCardRepository extends JpaRepository<CardEntity, Long> {
 
     Optional<CardEntity> findByCardNumber(String cardNumber);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query(value = "SELECT * FROM cards WHERE card_number = ?1 FOR UPDATE", nativeQuery = true)
     Optional<CardEntity> findWithLockByCardNumber(String cardNumber);
 }

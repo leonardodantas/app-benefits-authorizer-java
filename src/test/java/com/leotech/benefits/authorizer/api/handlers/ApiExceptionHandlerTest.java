@@ -2,6 +2,7 @@ package com.leotech.benefits.authorizer.api.handlers;
 
 import com.leotech.benefits.authorizer.api.responses.ErrorResponse;
 import com.leotech.benefits.authorizer.domain.shared.CustomException;
+import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,17 @@ class ApiExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(422);
         assertThat(response.getBody()).isEqualTo("CUSTOM_ERROR");
+    }
+
+    @Test
+    @DisplayName("should return 500 for TransactionSystemException")
+    void shouldHandleTransactionSystemException() {
+        final TransactionSystemException exception = new TransactionSystemException();
+
+        final ResponseEntity<String> response = handler.handleTransactionSystem(exception);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(500);
+        assertThat(response.getBody()).isEqualTo("SISTEMA_INTERMITENTE");
     }
 
     @Test
