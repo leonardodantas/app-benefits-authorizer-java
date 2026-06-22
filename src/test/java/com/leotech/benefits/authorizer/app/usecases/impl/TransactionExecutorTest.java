@@ -42,16 +42,12 @@ class TransactionExecutorTest {
                 .cardNumber("1234567890123456")
                 .balance(new BigDecimal("70.00"))
                 .build();
+        final Transaction transaction = new Transaction("1234567890123456", "1234", new BigDecimal("30.00"));
 
-        doAnswer(invocation -> {
-            final TransactionContext ctx = invocation.getArgument(0);
-            ctx.setCard(card);
-            ctx.setStatus(HandlerStatus.SUCCESS);
-            return null;
-        }).when(chain).handle(any(TransactionContext.class));
+        when(chain.handle(any(TransactionContext.class)))
+                .thenReturn(new TransactionContext(transaction).withCard(card).withStatus(HandlerStatus.SUCCESS));
 
         final TransactionExecutor executor = new TransactionExecutor(chain, eventPublisher);
-        final Transaction transaction = new Transaction("1234567890123456", "1234", new BigDecimal("30.00"));
 
         final Card result = executor.execute(transaction);
 
@@ -64,15 +60,13 @@ class TransactionExecutorTest {
     @Test
     @DisplayName("should throw exception and publish error event when chain stops with error")
     void shouldThrowOnStopWithException() {
-        doAnswer(invocation -> {
-            final TransactionContext ctx = invocation.getArgument(0);
-            ctx.setStatus(HandlerStatus.STOP);
-            ctx.setException(new CardNotExistsException());
-            return null;
-        }).when(chain).handle(any(TransactionContext.class));
+        final Transaction transaction = new Transaction("1234567890123456", "1234", BigDecimal.TEN);
+
+        when(chain.handle(any(TransactionContext.class)))
+                .thenReturn(new TransactionContext(transaction).withStatus(HandlerStatus.STOP)
+                        .withException(new CardNotExistsException()));
 
         final TransactionExecutor executor = new TransactionExecutor(chain, eventPublisher);
-        final Transaction transaction = new Transaction("1234567890123456", "1234", BigDecimal.TEN);
 
         assertThatThrownBy(() -> executor.execute(transaction))
                 .isInstanceOf(CardNotExistsException.class)
@@ -94,16 +88,12 @@ class TransactionExecutorTest {
                 .cardNumber("1234567890123456")
                 .balance(new BigDecimal("100.00"))
                 .build();
+        final Transaction transaction = new Transaction("1234567890123456", "1234", BigDecimal.TEN);
 
-        doAnswer(invocation -> {
-            final TransactionContext ctx = invocation.getArgument(0);
-            ctx.setCard(card);
-            ctx.setStatus(HandlerStatus.STOP);
-            return null;
-        }).when(chain).handle(any(TransactionContext.class));
+        when(chain.handle(any(TransactionContext.class)))
+                .thenReturn(new TransactionContext(transaction).withCard(card).withStatus(HandlerStatus.STOP));
 
         final TransactionExecutor executor = new TransactionExecutor(chain, eventPublisher);
-        final Transaction transaction = new Transaction("1234567890123456", "1234", BigDecimal.TEN);
 
         assertThatThrownBy(() -> executor.execute(transaction))
                 .isInstanceOf(TransactionStoppedException.class)

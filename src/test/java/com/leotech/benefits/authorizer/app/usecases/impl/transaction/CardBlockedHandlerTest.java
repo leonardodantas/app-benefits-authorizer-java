@@ -29,12 +29,10 @@ class CardBlockedHandlerTest {
                     .status(CardStatus.ACTIVE)
                     .build();
 
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(result.status()).isEqualTo(HandlerStatus.CONTINUE);
         }
     }
 
@@ -50,14 +48,12 @@ class CardBlockedHandlerTest {
                     .status(CardStatus.BLOCKED)
                     .build();
 
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.getException()).isInstanceOf(CardBlockedException.class);
-            assertThat(context.getException()).hasMessage("CARTAO_BLOQUEADO");
+            assertThat(result.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(result.exception()).isInstanceOf(CardBlockedException.class);
+            assertThat(result.exception()).hasMessage("CARTAO_BLOQUEADO");
         }
     }
 }

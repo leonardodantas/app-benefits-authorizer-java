@@ -39,13 +39,11 @@ class PasswordValidationHandlerTest {
             when(passwordEncoder.matches("raw-password", "encrypted-password")).thenReturn(true);
 
             final PasswordValidationHandler handler = new PasswordValidationHandler(passwordEncoder);
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.getException()).isNull();
+            assertThat(result.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(result.exception()).isNull();
             verify(passwordEncoder).matches("raw-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }
@@ -62,14 +60,12 @@ class PasswordValidationHandlerTest {
             when(passwordEncoder.matches("wrong-password", "encrypted-password")).thenReturn(false);
 
             final PasswordValidationHandler handler = new PasswordValidationHandler(passwordEncoder);
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.getException()).isInstanceOf(InvalidPasswordException.class);
-            assertThat(context.getException()).hasMessage("SENHA_INVALIDA");
+            assertThat(result.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(result.exception()).isInstanceOf(InvalidPasswordException.class);
+            assertThat(result.exception()).hasMessage("SENHA_INVALIDA");
             verify(passwordEncoder).matches("wrong-password", "encrypted-password");
             verifyNoMoreInteractions(passwordEncoder);
         }

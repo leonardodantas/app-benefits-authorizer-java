@@ -35,14 +35,13 @@ class DebitHandlerTest {
                 .build();
 
         final Transaction transaction = new Transaction("123", "senha", new BigDecimal("30.00"));
-        final TransactionContext context = new TransactionContext(transaction);
-        context.setCard(card);
+        final TransactionContext context = new TransactionContext(transaction).withCard(card);
 
         final DebitHandler handler = new DebitHandler(cardRepository);
 
-        handler.doHandle(context);
+        final TransactionContext result = handler.doHandle(context);
 
-        assertThat(context.getStatus()).isEqualTo(HandlerStatus.SUCCESS);
+        assertThat(result.status()).isEqualTo(HandlerStatus.SUCCESS);
         verify(cardRepository).save(cardCaptor.capture());
 
         final Card saved = cardCaptor.getValue();

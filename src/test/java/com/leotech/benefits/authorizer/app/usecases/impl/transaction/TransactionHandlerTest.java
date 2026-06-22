@@ -1,7 +1,5 @@
 package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 
-import com.leotech.benefits.authorizer.domain.card.Card;
-import com.leotech.benefits.authorizer.domain.transaction.CardNotExistsException;
 import com.leotech.benefits.authorizer.domain.transaction.Transaction;
 import com.leotech.benefits.authorizer.domain.transaction.TransactionSystemException;
 import org.junit.jupiter.api.DisplayName;
@@ -33,15 +31,29 @@ class TransactionHandlerTest {
             final TransactionHandler second = mock(TransactionHandler.class, CALLS_REAL_METHODS);
             final TransactionHandler third = mock(TransactionHandler.class, CALLS_REAL_METHODS);
 
-            first.setNext(second);
-            second.setNext(third);
+            first.then(second);
+            second.then(third);
 
-            first.handle(context);
+            when(first.doHandle(any(TransactionContext.class))).thenAnswer(invocation -> {
+                final TransactionContext ctx = invocation.getArgument(0);
+                return ctx.withStatus(HandlerStatus.CONTINUE);
+            });
+            when(second.doHandle(any(TransactionContext.class))).thenAnswer(invocation -> {
+                final TransactionContext ctx = invocation.getArgument(0);
+                return ctx.withStatus(HandlerStatus.CONTINUE);
+            });
+            when(third.doHandle(any(TransactionContext.class))).thenAnswer(invocation -> {
+                final TransactionContext ctx = invocation.getArgument(0);
+                return ctx.withStatus(HandlerStatus.CONTINUE);
+            });
+
+            final TransactionContext result = first.handle(context);
 
             final InOrder order = inOrder(first, second, third);
-            order.verify(first).doHandle(context);
-            order.verify(second).doHandle(context);
-            order.verify(third).doHandle(context);
+            order.verify(first).doHandle(any(TransactionContext.class));
+            order.verify(second).doHandle(any(TransactionContext.class));
+            order.verify(third).doHandle(any(TransactionContext.class));
+            assertThat(result.status()).isEqualTo(HandlerStatus.CONTINUE);
         }
     }
 
@@ -55,15 +67,15 @@ class TransactionHandlerTest {
             final TransactionHandler first = mock(TransactionHandler.class, CALLS_REAL_METHODS);
             final TransactionHandler second = mock(TransactionHandler.class, CALLS_REAL_METHODS);
 
-            doThrow(new RuntimeException("unexpected")).when(first).doHandle(any(TransactionContext.class));
+            when(first.doHandle(any(TransactionContext.class))).thenThrow(new RuntimeException("unexpected"));
 
-            first.setNext(second);
+            first.then(second);
 
-            first.handle(context);
+            final TransactionContext result = first.handle(context);
 
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.getException()).isInstanceOf(TransactionSystemException.class);
-            assertThat(context.getException()).hasMessage("SISTEMA_INTERMITENTE");
+            assertThat(result.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(result.exception()).isInstanceOf(TransactionSystemException.class);
+            assertThat(result.exception()).hasMessage("SISTEMA_INTERMITENTE");
             verify(second, never()).doHandle(any(TransactionContext.class));
         }
     }

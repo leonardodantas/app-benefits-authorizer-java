@@ -27,13 +27,11 @@ class BalanceValidationHandlerTest {
             final Transaction transaction = new Transaction("123", "senha", new BigDecimal("30.00"));
 
             final BalanceValidationHandler handler = new BalanceValidationHandler();
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.getException()).isNull();
+            assertThat(result.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(result.exception()).isNull();
         }
     }
 
@@ -51,13 +49,11 @@ class BalanceValidationHandlerTest {
             final Transaction transaction = new Transaction("123", "senha", new BigDecimal("30.00"));
 
             final BalanceValidationHandler handler = new BalanceValidationHandler();
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.CONTINUE);
-            assertThat(context.getException()).isNull();
+            assertThat(result.status()).isEqualTo(HandlerStatus.CONTINUE);
+            assertThat(result.exception()).isNull();
         }
     }
 
@@ -75,14 +71,12 @@ class BalanceValidationHandlerTest {
             final Transaction transaction = new Transaction("123", "senha", new BigDecimal("30.00"));
 
             final BalanceValidationHandler handler = new BalanceValidationHandler();
-            final TransactionContext context = new TransactionContext(transaction);
-            context.setCard(card);
+            final TransactionContext context = new TransactionContext(transaction).withCard(card);
+            final TransactionContext result = handler.doHandle(context);
 
-            handler.doHandle(context);
-
-            assertThat(context.getStatus()).isEqualTo(HandlerStatus.STOP);
-            assertThat(context.getException()).isInstanceOf(InsufficientBalanceException.class);
-            assertThat(context.getException()).hasMessage("SALDO_INSUFICIENTE");
+            assertThat(result.status()).isEqualTo(HandlerStatus.STOP);
+            assertThat(result.exception()).isInstanceOf(InsufficientBalanceException.class);
+            assertThat(result.exception()).hasMessage("SALDO_INSUFICIENTE");
         }
     }
 }
