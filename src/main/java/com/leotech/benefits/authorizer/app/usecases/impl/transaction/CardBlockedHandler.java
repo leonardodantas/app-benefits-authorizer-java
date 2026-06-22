@@ -1,5 +1,6 @@
 package com.leotech.benefits.authorizer.app.usecases.impl.transaction;
 
+import com.leotech.benefits.authorizer.domain.card.Card;
 import com.leotech.benefits.authorizer.domain.card.CardBlockedException;
 import com.leotech.benefits.authorizer.domain.card.CardStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -8,14 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 public class CardBlockedHandler extends TransactionHandler {
 
     @Override
-    protected void doHandle(final TransactionContext context) {
-        final var card = context.getCard();
+    protected TransactionContext doHandle(final TransactionContext context) {
+        final Card card = context.card();
         if (card.status() == CardStatus.BLOCKED) {
             log.warn("Card {} is blocked", card.cardNumber());
-            context.setStatus(HandlerStatus.STOP);
-            context.setException(new CardBlockedException());
-            return;
+            return context.withStatus(HandlerStatus.STOP)
+                    .withException(new CardBlockedException());
         }
-        context.setStatus(HandlerStatus.CONTINUE);
+        return context.withStatus(HandlerStatus.CONTINUE);
     }
 }
