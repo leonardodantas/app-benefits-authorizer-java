@@ -13,16 +13,16 @@ Microsserviço de autorização de transações para cartões de benefícios. Re
 | Java | 21 | Runtime |
 | Spring Boot | 4.1.0 | Framework principal |
 | Spring Data JPA | — | Persistência relacional |
-| MySQL | 8.0 | Banco de dados |
+| MySQL | 5.7 | Banco de dados |
 | Flyway | — | Migration do schema |
 | jBCrypt | 0.4 | Hashing de senhas |
 | MapStruct | — | Mapeamento entre camadas |
 | Lombok | — | Redução de boilerplate |
 | JUnit 5 | — | Testes unitários |
 | Mockito | — | Mocks |
-| Testcontainers | 1.20 | Testes de integração com MySQL real |
-| Awaitility | 4.2 | Asserções assíncronas em testes |
-| ArchUnit | 1.3 | Testes de arquitetura |
+| Testcontainers | 1.20.6 | Testes de integração com MySQL real |
+| Awaitility | 4.2.2 | Asserções assíncronas em testes |
+| ArchUnit | 1.3.0 | Testes de arquitetura |
 | SpringDoc OpenAPI | — | Documentação Swagger |
 | JaCoCo | 0.8.12 | Cobertura de código (100%) |
 | GitHub Actions | — | CI |
