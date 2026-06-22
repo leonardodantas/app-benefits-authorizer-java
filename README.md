@@ -138,7 +138,7 @@ Retorna o histórico paginado de transações de um cartão, ordenado da mais re
 |---|---|---|
 | `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/miniautorizador` | URL do MySQL |
 | `SPRING_DATASOURCE_USERNAME` | `root` | Usuário do MySQL |
-| `SPRING_DATASOURCE_PASSWORD` | `root` | Senha do MySQL |
+| `SPRING_DATASOURCE_PASSWORD` | *(vazia)* | Senha do MySQL |
 | `APP_INITIAL_BALANCE` | `500` | Saldo inicial ao criar cartão |
 
 ### Passos
