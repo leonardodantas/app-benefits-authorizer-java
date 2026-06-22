@@ -91,6 +91,12 @@ Retorna o saldo atual do cartão.
 - `200` — Saldo retornado
 - `404` — Cartão não encontrado
 
+### Listar cartões (`GET /cartoes?page=0&size=20`)
+
+Retorna a lista paginada de cartões com número e saldo, ordenada do mais recente para o mais antigo.
+
+- `200` — Lista retornada com sucesso
+
 ### Processar transação (`POST /transacoes`)
 
 Processa uma transação utilizando o padrão **Chain of Responsibility**, onde cada handler é responsável por uma única validação e decide se a chain deve continuar, parar por erro ou finalizar com sucesso — tudo controlado pelo `HandlerStatus` no `TransactionContext`.
