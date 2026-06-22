@@ -11,22 +11,24 @@ public abstract class TransactionHandler {
 
     private TransactionHandler next;
 
-    public void setNext(final TransactionHandler next) {
+    public TransactionHandler then(final TransactionHandler next) {
         this.next = next;
+        return next;
     }
 
-    public final void handle(final TransactionContext context) {
+    public final TransactionContext handle(final TransactionContext context) {
         try {
-            doHandle(context);
-            if (context.getStatus() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
-                next.handle(context);
+            final TransactionContext newContext = doHandle(context);
+            if (newContext.status() == HandlerStatus.CONTINUE && Objects.nonNull(next)) {
+                return next.handle(newContext);
             }
+            return newContext;
         } catch (final RuntimeException e) {
             log.error("Unexpected error in handler", e);
-            context.setStatus(HandlerStatus.STOP);
-            context.setException(new TransactionSystemException());
+            return context.withStatus(HandlerStatus.STOP)
+                    .withException(new TransactionSystemException());
         }
     }
 
-    protected abstract void doHandle(TransactionContext context);
+    protected abstract TransactionContext doHandle(TransactionContext context);
 }
