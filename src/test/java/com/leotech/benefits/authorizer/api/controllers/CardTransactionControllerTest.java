@@ -79,7 +79,7 @@ class CardTransactionControllerTest {
             mockMvc.perform(get("/cartoes/{numeroCartao}/transacoes", CARD_NUMBER))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isEmpty())
-                    .andExpect(jsonPath("$.totalElements").value(0));
+                    .andExpect(jsonPath("$.page.totalElements").value(0));
 
             verify(getTransactionHistoryUseCase).execute(eq(CARD_NUMBER), isNull(), eq(0), eq(20));
             verifyNoInteractions(transactionMapper);

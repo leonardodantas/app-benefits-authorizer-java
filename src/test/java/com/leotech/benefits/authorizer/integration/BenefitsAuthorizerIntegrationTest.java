@@ -434,6 +434,52 @@ class BenefitsAuthorizerIntegrationTest {
     }
 
     @Nested
+    @DisplayName("Card lifecycle: block/unblock with balance verification")
+    class CardLifecycle {
+
+        private static final String CARD_NUMBER = "1212121212121212";
+
+        @Test
+        @DisplayName("should block, reject transaction, unblock, allow transaction, and keep correct balance throughout")
+        void shouldMaintainCorrectBalanceThroughBlockUnblock() {
+            final CreateCardRequest createRequest = new CreateCardRequest(CARD_NUMBER, "1234");
+            final PostResult createResult = postRaw("/cartoes", createRequest);
+            assertThat(createResult.status()).isEqualTo(201);
+
+            final RecordGetResult balanceAfterCreation = getRaw("/cartoes/" + CARD_NUMBER);
+            assertThat(balanceAfterCreation.status()).isEqualTo(200);
+            assertThat(new BigDecimal(balanceAfterCreation.body())).isEqualByComparingTo(new BigDecimal("500.00"));
+
+            final UpdateCardStatusRequest blockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.BLOCKED);
+            final RecordGetResult blockResult = patchRaw("/cartoes/" + CARD_NUMBER, blockRequest);
+            assertThat(blockResult.status()).isEqualTo(204);
+
+            final PostResult deniedTransaction = postRaw("/transacoes",
+                    new CreateTransactionRequest(CARD_NUMBER, "1234", new BigDecimal("100.00")));
+            assertThat(deniedTransaction.status()).isEqualTo(422);
+            assertThat(deniedTransaction.body()).isEqualTo("CARTAO_BLOQUEADO");
+
+            final RecordGetResult balanceAfterBlockedTransaction = getRaw("/cartoes/" + CARD_NUMBER);
+            assertThat(balanceAfterBlockedTransaction.status()).isEqualTo(200);
+            assertThat(new BigDecimal(balanceAfterBlockedTransaction.body())).isEqualByComparingTo(new BigDecimal("500.00"));
+
+            final UpdateCardStatusRequest unblockRequest = new UpdateCardStatusRequest(
+                    com.leotech.benefits.authorizer.domain.card.CardStatus.ACTIVE);
+            final RecordGetResult unblockResult = patchRaw("/cartoes/" + CARD_NUMBER, unblockRequest);
+            assertThat(unblockResult.status()).isEqualTo(204);
+
+            final PostResult successfulTransaction = postRaw("/transacoes",
+                    new CreateTransactionRequest(CARD_NUMBER, "1234", new BigDecimal("100.00")));
+            assertThat(successfulTransaction.status()).isEqualTo(201);
+
+            final RecordGetResult balanceAfterTransaction = getRaw("/cartoes/" + CARD_NUMBER);
+            assertThat(balanceAfterTransaction.status()).isEqualTo(200);
+            assertThat(new BigDecimal(balanceAfterTransaction.body())).isEqualByComparingTo(new BigDecimal("400.00"));
+        }
+    }
+
+    @Nested
     @DisplayName("Concurrency")
     class Concurrency {
 

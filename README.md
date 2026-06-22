@@ -81,7 +81,7 @@ Resposta
 Cria um novo cartão com número de 16 dígitos e senha. O saldo inicial é configurável (padrão: R$ 500,00).
 
 - `201` — Cartão criado com sucesso
-- `400` — Dados inválidos (formato do cartão, campos obrigatórios)
+- `400` — Dados inválidos (formato do cartão, campos obrigatórios). Mensagens de validação em português.
 - `422` — Cartão já existe
 
 ### Consultar saldo (`GET /cartoes/{numeroCartao}`)
@@ -93,7 +93,7 @@ Retorna o saldo atual do cartão.
 
 ### Listar cartões (`GET /cartoes?page=0&size=20`)
 
-Retorna a lista paginada de cartões com número e saldo, ordenada do mais recente para o mais antigo.
+Retorna a lista paginada de cartões com número e saldo, ordenada do mais recente para o mais antigo. Os metadados de paginação (`number`, `size`, `totalElements`, `totalPages`) são retornados dentro do objeto `page`.
 
 - `200` — Lista retornada com sucesso
 
@@ -111,7 +111,7 @@ Isolamento de responsabilidades:
 Cada handler define `CONTINUE`, `STOP` ou `SUCCESS` no contexto. Se `STOP`, a exception armazenada é relançada pelo `TransactionExecutor` e tratada centralizadamente pelo `ApiExceptionHandler`, eliminando `throw`s espalhados pela chain e mantendo o fluxo previsível e testável.
 
 - `201` — Transação aprovada
-- `400` — Dados inválidos
+- `400` — Dados inválidos. Mensagens de validação em português.
 - `422` — Cartão inexistente / Senha inválida / Saldo insuficiente / Cartão bloqueado
 
 ### Atualizar status do cartão (`PATCH /cartoes/{numeroCartao}`)
@@ -121,12 +121,12 @@ Atualiza o status do cartão entre `ACTIVE` e `BLOCKED`. Idempotente — se o ca
 Um cartão bloqueado rejeita qualquer transação com `422 CARTAO_BLOQUEADO`.
 
 - `204` — Status atualizado com sucesso
-- `400` — Dados inválidos (status ausente ou inválido)
+- `400` — Dados inválidos (status ausente ou inválido). Mensagens de validação em português.
 - `404` — Cartão não encontrado
 
 ### Consultar histórico de transações (`GET /cartoes/{numeroCartao}/transacoes?page=0&size=20`)
 
-Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora. Aceita filtro opcional por `?status=SUCCESS|ERROR`.
+Retorna o histórico paginado de transações de um cartão, ordenado da mais recente para a mais antiga. Cada transação registra o saldo anterior, novo saldo, valor e data/hora. Aceita filtro opcional por `?status=SUCCESS|ERROR`. Os metadados de paginação são retornados dentro do objeto `page`.
 
 - `200` — Histórico retornado com sucesso
 
