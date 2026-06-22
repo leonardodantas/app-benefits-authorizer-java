@@ -24,20 +24,19 @@ public class TransactionExecutor {
 
     public Card execute(final Transaction transaction) {
         log.info("Starting transaction execution for card {}", transaction.cardNumber());
-        final TransactionContext context = new TransactionContext(transaction);
-        chain.handle(context);
+        final TransactionContext context = chain.handle(new TransactionContext(transaction));
 
-        if (context.getStatus() == HandlerStatus.STOP) {
-            if (Objects.nonNull(context.getException())) {
-                log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.getException().getMessage());
+        if (context.status() == HandlerStatus.STOP) {
+            if (Objects.nonNull(context.exception())) {
+                log.warn("Transaction stopped for card {}: {}", transaction.cardNumber(), context.exception().getMessage());
                 eventPublisher.publishEvent(TransactionEvent.error(
                         transaction.cardNumber(),
-                        context.getException().getMessage()
+                        context.exception().getMessage()
                 ));
-                throw context.getException();
+                throw context.exception();
             }
             log.warn("Transaction stopped without exception for card {}", transaction.cardNumber());
-            final var stopException = new TransactionStoppedException();
+            final TransactionStoppedException stopException = new TransactionStoppedException();
             eventPublisher.publishEvent(TransactionEvent.error(
                     transaction.cardNumber(),
                     stopException.getMessage()
@@ -47,11 +46,11 @@ public class TransactionExecutor {
 
         log.info("Transaction executed successfully for card {}", transaction.cardNumber());
         eventPublisher.publishEvent(TransactionEvent.success(
-                context.getCard().cardNumber(),
-                context.getCard().balance().add(transaction.amount()),
-                context.getCard().balance(),
+                context.card().cardNumber(),
+                context.card().balance().add(transaction.amount()),
+                context.card().balance(),
                 transaction.amount()
         ));
-        return context.getCard();
+        return context.card();
     }
 }
