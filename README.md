@@ -251,7 +251,25 @@ Algumas decisões neste projeto foram intencionalmente levadas além do estritam
 
 ## Concorrência
 
-Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`, garantindo que não haja condição de corrida no saldo. O teste de integração valida este cenário.
+Transações concorrentes para o mesmo cartão são serializadas via `PESSIMISTIC_WRITE`,
+garantindo que não haja condição de corrida no saldo.
+
+A escolha do lock pessimista em vez do otimista foi deliberada:
+
+- **Domínio financeiro**: saldo incorreto é inaceitável. Com lock otimista, duas
+  transações poderiam ler o mesmo saldo, ambas validar como suficiente, e a segunda
+  falhar com `OptimisticLockException` — exigindo retry no código e abrindo janela
+  para experiência inconsistente.
+- **Simplicidade**: sem lógica de retry. O lock no banco serializa naturalmente,
+  e o `@Transactional` garante que leitura e débito estão na mesma transação.
+- **Janela crítica curta**: o lock dura apenas o tempo da chain (validar + debitar),
+  minimizando contenção.
+
+Para um cenário com contenção muito baixa ou requisitos menos rígidos de
+consistência, o lock otimista seria mais performático. Aqui, priorizamos
+corretude sobre throughput máximo.
+
+O teste de integração valida este cenário com transações simultâneas.
 
 ## Idempotência
 
