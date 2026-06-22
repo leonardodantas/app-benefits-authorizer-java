@@ -5,6 +5,6 @@ import com.leotech.benefits.authorizer.domain.shared.CustomException;
 public class CardAlreadyExistsException extends CustomException {
 
     public CardAlreadyExistsException(final String cardNumber) {
-        super("Card " + cardNumber + " already exists");
+        super("Cartão " + cardNumber + " já existe");
     }
 }

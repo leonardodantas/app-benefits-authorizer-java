@@ -15,18 +15,22 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestControllerAdvice
 @Slf4j
 public class ApiExceptionHandler {
 
-    private static final String VALIDATION_FAILED = "Validation failed";
+    private static final String VALIDATION_FAILED = "Falha na validação";
     private static final String INTERNAL_SERVER_ERROR = "Internal server error";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(final MethodArgumentNotValidException ex) {
         log.warn("Validation failed: {}", ex.getMessage());
+        final LocalDateTime now = LocalDateTime.now();
+        final UUID errorId = UUID.randomUUID();
         final List<ErrorResponse.FieldError> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> new ErrorResponse.FieldError(error.getField(), error.getDefaultMessage()))
                 .toList();
@@ -34,6 +38,8 @@ public class ApiExceptionHandler {
         final ErrorResponse response = new ErrorResponse(
                 400,
                 VALIDATION_FAILED,
+                now,
+                errorId,
                 errors
         );
 
@@ -43,9 +49,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(CardAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleCardAlreadyExists(final CardAlreadyExistsException ex) {
         log.warn("Card already exists: {}", ex.getMessage());
+        final LocalDateTime now = LocalDateTime.now();
+        final UUID errorId = UUID.randomUUID();
         final ErrorResponse response = new ErrorResponse(
                 422,
                 ex.getMessage(),
+                now,
+                errorId,
                 null
         );
         return ResponseEntity.status(422).body(response);
@@ -96,9 +106,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(final RuntimeException ex) {
         log.error("Unexpected error", ex);
+        final LocalDateTime now = LocalDateTime.now();
+        final UUID errorId = UUID.randomUUID();
         final ErrorResponse response = new ErrorResponse(
                 500,
                 INTERNAL_SERVER_ERROR,
+                now,
+                errorId,
                 null
         );
 

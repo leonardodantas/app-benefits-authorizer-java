@@ -101,9 +101,9 @@ class CardControllerTest {
                                     """))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.message").value("Validation failed"))
+                    .andExpect(jsonPath("$.message").value("Falha na validação"))
                     .andExpect(jsonPath("$.errors[0].field").value("cardNumber"))
-                    .andExpect(jsonPath("$.errors[0].message").value("must match \"^\\d{16}$\""));
+                    .andExpect(jsonPath("$.errors[0].message").value("O número do cartão deve ter 16 caracteres"));
 
             verifyNoInteractions(createCardUseCase, getBalanceUseCase, cardMapper);
         }
@@ -116,7 +116,7 @@ class CardControllerTest {
                             .content("{}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.message").value("Validation failed"))
+                    .andExpect(jsonPath("$.message").value("Falha na validação"))
                     .andExpect(jsonPath("$.errors").isArray());
 
             verifyNoInteractions(createCardUseCase, getBalanceUseCase, cardMapper);
@@ -139,7 +139,7 @@ class CardControllerTest {
                                     """.formatted(CARD_NUMBER, PASSWORD)))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.status").value(422))
-                    .andExpect(jsonPath("$.message").value("Card " + CARD_NUMBER + " already exists"));
+                    .andExpect(jsonPath("$.message").value("Cartão " + CARD_NUMBER + " já existe"));
 
             verify(cardMapper).toDomain(request);
             verify(createCardUseCase).execute(domain);

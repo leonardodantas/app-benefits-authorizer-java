@@ -6,6 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateCardStatusRequest(
-        @NotNull @JsonProperty("status") @Schema(description = "Novo status do cartão", example = "BLOCKED") CardStatus status
+        @NotNull(message = "O status é obrigatório") @JsonProperty("status") @Schema(description = "Novo status do cartão", example = "BLOCKED") CardStatus status
 ) {
 }

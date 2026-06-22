@@ -154,9 +154,9 @@ class TransactionControllerTest {
                                     """))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.message").value("Validation failed"))
+                    .andExpect(jsonPath("$.message").value("Falha na validação"))
                     .andExpect(jsonPath("$.errors[0].field").value("cardNumber"))
-                    .andExpect(jsonPath("$.errors[0].message").value("must match \"^\\d{16}$\""));
+                    .andExpect(jsonPath("$.errors[0].message").value("O número do cartão deve ter 16 caracteres"));
 
             verifyNoInteractions(createTransactionUseCase, transactionMapper);
         }
@@ -169,7 +169,7 @@ class TransactionControllerTest {
                             .content("{}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.message").value("Validation failed"))
+                    .andExpect(jsonPath("$.message").value("Falha na validação"))
                     .andExpect(jsonPath("$.errors").isArray());
 
             verifyNoInteractions(createTransactionUseCase, transactionMapper);

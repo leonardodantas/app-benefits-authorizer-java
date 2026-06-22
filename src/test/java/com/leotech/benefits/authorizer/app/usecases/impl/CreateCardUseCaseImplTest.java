@@ -64,7 +64,7 @@ class CreateCardUseCaseImplTest {
 
             assertThatThrownBy(() -> createCardUseCase.execute(input))
                     .isInstanceOf(CardAlreadyExistsException.class)
-                    .hasMessage("Card " + CARD_NUMBER + " already exists");
+                    .hasMessage("Cartão " + CARD_NUMBER + " já existe");
 
             verify(cardRepository).findByCardNumber(CARD_NUMBER);
             verifyNoMoreInteractions(cardRepository);
